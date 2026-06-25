@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from xnative.api.routes.capture import router as capture_router
 from xnative.api.routes.health import router as health_router
+from xnative.api.routes.jobs import router as jobs_router
 from xnative.db.seed import seed
 
 
@@ -13,6 +14,7 @@ def create_app(db_path: str | None = None) -> FastAPI:
     seed(db_path)
     app.include_router(health_router)
     app.include_router(capture_router)
+    app.include_router(jobs_router)
     return app
 
 

@@ -20,7 +20,7 @@ Status: Not release-ready
 - All ten fixture posts receive the same three template texts.
 - The current `phash` is a truncated SHA-256, not perceptual image hashing.
 - OCR, media storage, style retrieval, novelty, bandit and learning helpers are disconnected from the main pipeline.
-- The worker now has a durable/retryable Phase 3 core, but the full pipeline stage chain and UI dead-letter workflow are still missing.
+- The worker now has a durable/retryable Phase 3 core and queue/dead-letter operations panel, but the full pipeline stage chain is still missing.
 - Docker runtime health was not verified because the local Docker daemon was unavailable.
 - Tests do not cover recorded DOM fixture integration, OCR/pHash, UI, Docker health or end-to-end learning.
 

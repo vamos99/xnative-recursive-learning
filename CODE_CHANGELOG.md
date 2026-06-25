@@ -14,6 +14,7 @@ Code changes were allowed in this revision.
 - Added extension local-storage capture outbox, retry backoff, bounded outbox, accepted-after-queue DOM marking and reduced permissions.
 - Added Phase 3 durable job state transitions, attempt tracking, lease recovery, retry/dead-letter handling and a normalize-capture worker runner.
 - Added Phase 3 runtime controls: generic job enqueue/dedupe, bounded backpressure, resource-class admission limits, priority aging, durable cursors, versioned cache invalidation, worker loop and handler savepoint rollback.
+- Added queue/dead-letter operations: `GET /api/v1/jobs`, `POST /api/v1/jobs/{id}/retry`, replay audit logging and a Streamlit queue/dead-letter panel.
 - Added browser-visible capture parser and extension improvements.
 - Added fixture/manual import flow.
 - Added text cleaning, AI/news phrase filtering, quality filtering and style memory.
@@ -21,12 +22,12 @@ Code changes were allowed in this revision.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.
-- Added pytest test suite with 36 passing tests, including Phase 1 storage, Phase 2 API capture and Phase 3 job queue/runtime acceptance tests.
+- Added pytest test suite with 38 passing tests, including Phase 1 storage, Phase 2 API capture and Phase 3 job queue/runtime acceptance tests.
 - Added Dockerfile, docker-compose.yml and `.env.example`.
 
 ## Validation
 
-`.venv/bin/pytest -q` -> 36 passed.
+`.venv/bin/pytest -q` -> 38 passed.
 `.venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py` -> passed.
 `.venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py` -> passed.
 `.venv/bin/mypy xnative` -> passed.

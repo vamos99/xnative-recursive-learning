@@ -3,10 +3,13 @@ from __future__ import annotations
 import json
 
 import pytest
+from fastapi.testclient import TestClient
 
+from xnative.api.main import create_app
 from xnative.db.database import init_db
 from xnative.db.repositories import UnitOfWork
 from xnative.domain import CapturedPost, CaptureSource, ResourceClass, utc_us
+from xnative.ui.streamlit_app import load_queue_dashboard, replay_dead_letter
 from xnative.worker.scheduler import run_due_job_once, run_worker_loop
 
 
@@ -336,3 +339,58 @@ def test_failed_handler_rolls_back_partial_side_effects_before_retry(tmp_path) -
     assert cached == 0
     assert job["status"] == "retry"
     assert job["last_error_code"] == "ValueError"
+
+
+def test_dead_letter_can_be_listed_and_replayed(tmp_path) -> None:
+    db_path = tmp_path / "jobs.sqlite3"
+    with UnitOfWork(db_path) as uow:
+        result = uow.captures.persist_capture(make_post("1840000000000000205"))
+        job = uow.jobs.claim_next("worker-a", ResourceClass.LIGHT)
+        assert job is not None
+        uow.connection.execute("UPDATE jobs SET attempt_count=max_attempts WHERE id=?", (job.id,))
+        uow.jobs.fail_job(job.id, "PERMANENT", "bad payload", retryable=True)
+
+    dashboard = load_queue_dashboard(db_path)
+    dead_letters = dashboard["dead_letters"]
+    assert len(dead_letters) == 1
+    assert dead_letters[0]["job_id"] == result.job_id
+    assert dead_letters[0]["payload_snapshot"]["job_type"] == "normalize_capture"
+
+    replay = replay_dead_letter(db_path, str(result.job_id))
+    assert replay["source_job_id"] == result.job_id
+    assert not replay["duplicate"]
+
+    conn = init_db(db_path)
+    replayed = conn.execute("SELECT status FROM jobs WHERE id=?", (replay["job_id"],)).fetchone()
+    audit_count = conn.execute(
+        "SELECT COUNT(*) c FROM audit_log WHERE action='job.replayed'"
+    ).fetchone()["c"]
+    assert replayed["status"] == "pending"
+    assert audit_count == 1
+
+
+def test_jobs_api_exposes_dead_letters_and_accepts_retry(tmp_path) -> None:
+    db_path = tmp_path / "jobs.sqlite3"
+    with UnitOfWork(db_path) as uow:
+        result = uow.captures.persist_capture(make_post("1840000000000000206"))
+        job = uow.jobs.claim_next("worker-a", ResourceClass.LIGHT)
+        assert job is not None
+        uow.connection.execute("UPDATE jobs SET attempt_count=max_attempts WHERE id=?", (job.id,))
+        uow.jobs.fail_job(job.id, "PERMANENT", "bad payload", retryable=True)
+
+    app = create_app(str(db_path))
+    client = TestClient(app)
+    response = client.get("/api/v1/jobs")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["dead_letters"][0]["job_id"] == result.job_id
+    assert {"status": "dead", "resource_class": "light", "count": 1} in body["queue_summary"]
+
+    retry_response = client.post(f"/api/v1/jobs/{result.job_id}/retry")
+    assert retry_response.status_code == 202
+    retry_body = retry_response.json()
+    assert retry_body["source_job_id"] == result.job_id
+    assert retry_body["status"] == "accepted"
+
+    missing_response = client.post("/api/v1/jobs/not-a-real-job/retry")
+    assert missing_response.status_code == 404

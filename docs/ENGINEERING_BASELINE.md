@@ -15,16 +15,16 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-36 passed in 0.37s
+38 passed in 0.42s
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
 
 .venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py
-79 files already formatted
+80 files already formatted
 
 .venv/bin/mypy xnative
-Success: no issues found in 73 source files
+Success: no issues found in 74 source files
 
 .venv/bin/python -m compileall -q xnative tests scripts/docs
 exit 0
@@ -70,11 +70,12 @@ exit 0
 - Durable job gecisleri: `xnative/db/repositories.py`.
 - Worker runtime migration: `xnative/db/migrations/0002_worker_runtime.sql`.
 - Worker runner ve handler: `xnative/worker/scheduler.py`, `xnative/worker/jobs.py`.
+- Queue/dead-letter API ve UI: `xnative/api/routes/jobs.py`, `xnative/ui/streamlit_app.py`.
 - Acceptance testleri: `tests/integration/test_phase3_jobs.py`.
-- Kanitlanan kapilar: completed job, attempt kaydi, expired lease recovery, retryable failure, max attempt sonrasi dead-letter, unknown job type dead-letter, generic enqueue/dedupe, bounded backpressure, priority aging, resource admission, durable cursor, versioned cache invalidation, bounded worker loop ve handler hata rollback.
+- Kanitlanan kapilar: completed job, attempt kaydi, expired lease recovery, retryable failure, max attempt sonrasi dead-letter, unknown job type dead-letter, generic enqueue/dedupe, bounded backpressure, priority aging, resource admission, durable cursor, versioned cache invalidation, bounded worker loop, handler hata rollback, dead-letter listeleme, replay audit, API job gorunumu ve Streamlit helper.
 
 ## Sinirlar
 
-- Bu baseline mevcut 36 testin gectigini kanitlar; kaydedilmis DOM fixture -> API -> DB -> UI -> feedback akisini kanitlamaz.
+- Bu baseline mevcut 38 testin gectigini kanitlar; kaydedilmis DOM fixture -> API -> DB -> review -> feedback akisini kanitlamaz.
 - Docker Compose konfigurasyonu parse edildi; yerel Docker daemon calismadigi icin runtime health acceptance yapilmadi.
 - Multimodal model kalitesi ve performans SLO'lari henuz benchmark edilmedi.

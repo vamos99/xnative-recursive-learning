@@ -7,6 +7,7 @@ from collections.abc import Iterator, Mapping
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from xnative.core.config import settings
 from xnative.domain import (
@@ -32,6 +33,13 @@ class CapturePersistResult:
 class JobEnqueueResult:
     job_id: str
     duplicate: bool
+
+
+@dataclass(frozen=True)
+class JobReplayResult:
+    job_id: str
+    duplicate: bool
+    source_job_id: str
 
 
 @dataclass(frozen=True)
@@ -526,11 +534,123 @@ class JobRepository:
                 job_id,
                 error_code,
                 error_message,
-                json.dumps({"job_id": job_id}, sort_keys=True),
+                canonical_json(
+                    {
+                        "job_id": job_id,
+                        "job_type": str(row["job_type"]),
+                        "payload_ref": str(row["payload_ref"]),
+                        "resource_class": str(row["resource_class"]),
+                        "attempt_count": attempt_count,
+                    }
+                ),
                 now,
             ),
         )
         return "dead"
+
+    def queue_summary(self) -> list[dict[str, Any]]:
+        rows = self.conn.execute(
+            """
+            SELECT status, resource_class, COUNT(*) AS count
+            FROM jobs
+            GROUP BY status, resource_class
+            ORDER BY resource_class, status
+            """
+        ).fetchall()
+        return [
+            {
+                "status": str(row["status"]),
+                "resource_class": str(row["resource_class"]),
+                "count": int(row["count"]),
+            }
+            for row in rows
+        ]
+
+    def list_dead_letters(self, limit: int = 50) -> list[dict[str, Any]]:
+        rows = self.conn.execute(
+            """
+            SELECT
+              dl.id AS dead_letter_id,
+              dl.job_id,
+              dl.reason_code,
+              dl.reason_message,
+              dl.payload_snapshot_json,
+              dl.created_at AS dead_letter_created_at,
+              j.job_type,
+              j.payload_ref,
+              j.resource_class,
+              j.attempt_count,
+              j.max_attempts,
+              j.last_error_code,
+              j.last_error_message
+            FROM dead_letters dl
+            JOIN jobs j ON j.id=dl.job_id
+            ORDER BY dl.created_at DESC
+            LIMIT ?
+            """,
+            (max(1, limit),),
+        ).fetchall()
+        return [
+            {
+                "dead_letter_id": str(row["dead_letter_id"]),
+                "job_id": str(row["job_id"]),
+                "job_type": str(row["job_type"]),
+                "payload_ref": str(row["payload_ref"]),
+                "resource_class": str(row["resource_class"]),
+                "attempt_count": int(row["attempt_count"]),
+                "max_attempts": int(row["max_attempts"]),
+                "reason_code": str(row["reason_code"]),
+                "reason_message": row["reason_message"],
+                "last_error_code": row["last_error_code"],
+                "last_error_message": row["last_error_message"],
+                "payload_snapshot": json.loads(str(row["payload_snapshot_json"])),
+                "created_at": int(row["dead_letter_created_at"]),
+            }
+            for row in rows
+        ]
+
+    def replay_dead_letter(self, job_id: str) -> JobReplayResult:
+        row = self.conn.execute(
+            """
+            SELECT * FROM jobs
+            WHERE id=? AND status='dead'
+            """,
+            (job_id,),
+        ).fetchone()
+        if row is None:
+            raise ValueError(f"Dead job not found: {job_id}")
+        result = self.enqueue_job(
+            job_type=str(row["job_type"]),
+            payload_ref=str(row["payload_ref"]),
+            priority=max(80, int(row["priority"])),
+            resource_class=ResourceClass(str(row["resource_class"])),
+            dedupe_key=str(row["dedupe_key"]),
+            max_attempts=int(row["max_attempts"]),
+        )
+        now = utc_us()
+        self.conn.execute(
+            """
+            INSERT INTO audit_log(id, action, entity_type, entity_id, details_json, created_at)
+            VALUES (?, 'job.replayed', 'job', ?, ?, ?)
+            """,
+            (
+                new_uuid(),
+                result.job_id,
+                canonical_json(
+                    {
+                        "source_job_id": job_id,
+                        "duplicate": result.duplicate,
+                        "job_type": str(row["job_type"]),
+                    }
+                ),
+                now,
+            ),
+        )
+        return JobReplayResult(
+            job_id=result.job_id,
+            duplicate=result.duplicate,
+            source_job_id=job_id,
+        )
 
 
 class FeatureRepository:

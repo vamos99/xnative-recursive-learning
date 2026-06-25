@@ -29,6 +29,8 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
 - Phase 3 worker runtime now includes generic job enqueue/dedupe, bounded
   backpressure, resource-class admission limits, priority aging, durable cursors,
   versioned cache invalidation and a bounded worker loop.
+- Queue/dead-letter visibility was added through `GET /api/v1/jobs`, manual
+  retry through `POST /api/v1/jobs/{id}/retry`, and a Streamlit operations panel.
 - Browser extension capture contract improved.
 - Manual fixture import and sample mode added.
 - Text, quote, media alt text, OCR fallback, pHash-style hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
@@ -73,7 +75,8 @@ PYTHONPATH=. python -m xnative.sample_pipeline
 
 The current tests exercise helper functions, the fixture sample, Phase 1 storage
 contracts, Phase 2 API capture persistence, payload limits, validation and the
-Phase 3 job queue/worker runtime core. They do not yet prove the recorded DOM
+Phase 3 job queue/worker runtime core, including dead-letter visibility/retry.
+They do not yet prove the recorded DOM
 fixture -> API -> database -> review -> feedback workflow. See the traceability
 matrix for the missing acceptance coverage.
 
