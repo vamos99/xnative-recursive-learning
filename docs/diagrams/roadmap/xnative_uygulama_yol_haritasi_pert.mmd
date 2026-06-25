@@ -1,0 +1,32 @@
+flowchart LR
+    %% XNative Uygulama Yol Haritasi
+    P0["P0: Baseline ve yonetisim (3d critical)"]
+    P1["P1: Veri omurgasi (5d critical)"]
+    P2["P2: Guvenilir capture (5d critical)"]
+    P3["P3: Queue ve pipeline (6d critical)"]
+    P4["P4: Medya ve arsiv (5d critical)"]
+    P5["P5: Multimodal anlama (10d critical)"]
+    P6["P6: Olay bellegi (7d critical)"]
+    P7["P7: Kaynak ogrenimi (6d critical)"]
+    P8["P8: Cok hedefli ranking (8d critical)"]
+    P9["P9: Taslak ve guvenlik (6d critical)"]
+    P10["P10: Feedback ve learning (8d critical)"]
+    P11["P11: Review UI (8d critical)"]
+    P12["P12: Performans ve guvenlik (6d critical)"]
+    P13["P13: Release testleri (5d critical)"]
+    P14["P14: Final belgeler (1d critical)"]
+    P0 ==> P1
+    P1 ==> P2
+    P2 ==> P3
+    P3 ==> P4
+    P4 ==> P5
+    P5 ==> P6
+    P6 ==> P7
+    P6 --> P8
+    P7 ==> P8
+    P8 ==> P9
+    P9 ==> P10
+    P10 ==> P11
+    P11 ==> P12
+    P12 ==> P13
+    P13 ==> P14

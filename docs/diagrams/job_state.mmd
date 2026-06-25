@@ -1,0 +1,20 @@
+stateDiagram-v2
+    [*] --> pending
+    pending --> running: atomic claim + lease
+    running --> completed: stage committed
+    running --> retry: retryable error
+    retry --> running: available_at reached
+    running --> dead: fatal error or attempts exhausted
+    running --> pending: lease expired
+    pending --> cancelled: safe admin cancellation
+    retry --> cancelled: safe admin cancellation
+    completed --> [*]
+    dead --> [*]
+    cancelled --> [*]
+
+    note right of running
+      heavy semaphore = 1
+      light semaphore = 2
+      inference outside DB transaction
+    end note
+

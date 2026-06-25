@@ -1,0 +1,18 @@
+flowchart TD
+    C["Captured multimodal context"] --> H["Hydration ve evidence"]
+    H --> R["Candidate retrieval ve ranking"]
+    R --> V["Guvenli taslak varyantlari"]
+    V --> U["Human review"]
+    U -->|approve/edit/reject/ignore| F["Immutable feedback events"]
+    U -->|manuel post sonrasi| P["Performance snapshots"]
+    F --> E["Segmentli evaluation"]
+    P --> E
+    E --> D{"Minimum veri ve kalite kapisi"}
+    D -->|gecmez| K["Mevcut champion korunur"]
+    D -->|gecer| S["Challenger train veya weight update"]
+    S --> O["Offline ve shadow test"]
+    O -->|daha iyi ve guvenli| N["Versionlanmis champion"]
+    O -->|regression| K
+    N --> R
+    N -->|drift veya dusus| B["Rollback"]
+    B --> K

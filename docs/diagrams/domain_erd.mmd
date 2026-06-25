@@ -1,0 +1,61 @@
+erDiagram
+    CAPTURED_POST ||--o{ MEDIA_ASSET : contains
+    CAPTURED_POST ||--o{ POST_METRIC : observed_as
+    CAPTURED_POST ||--o{ FEATURE : derives
+    CAPTURED_POST }o--o{ EVENT : grouped_in
+    EVENT ||--o{ CANDIDATE : produces
+    CANDIDATE ||--o{ SUGGESTION : generates
+    SUGGESTION ||--o{ FEEDBACK_EVENT : receives
+    CAPTURED_POST ||--o{ PERFORMANCE_SNAPSHOT : measured_by
+    SOURCE ||--o{ CAPTURED_POST : authors
+    SOURCE ||--o{ SOURCE_RELIABILITY_SNAPSHOT : evaluated_by
+    GRAPH_NODE ||--o{ GRAPH_EDGE : source
+    GRAPH_NODE ||--o{ GRAPH_EDGE : target
+    MODEL_REGISTRY ||--o{ MODEL_OUTPUT : creates
+    JOB ||--o{ JOB_ATTEMPT : retries
+
+    CAPTURED_POST {
+      uuid id PK
+      string platform_post_id UK
+      string canonical_url
+      string author_handle
+      text visible_text
+      string idempotency_key UK
+      datetime captured_at
+    }
+    MEDIA_ASSET {
+      uuid id PK
+      uuid post_id FK
+      string kind
+      string exact_sha256
+      string perceptual_hash
+      string storage_policy
+    }
+    EVENT {
+      uuid id PK
+      string event_type
+      string status
+      float confidence
+      datetime last_seen_at
+    }
+    SUGGESTION {
+      uuid id PK
+      uuid candidate_id FK
+      text draft_text
+      string review_state
+      string model_version
+    }
+    FEEDBACK_EVENT {
+      uuid id PK
+      uuid suggestion_id FK
+      string action
+      datetime occurred_at
+    }
+    JOB {
+      uuid id PK
+      string job_type
+      string status
+      int priority
+      datetime lease_expires_at
+    }
+

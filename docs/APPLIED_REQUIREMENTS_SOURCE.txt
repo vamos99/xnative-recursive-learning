@@ -1,0 +1,987 @@
+Sen Agent Mode’da çalışan kıdemli full-stack AI systems engineer, ML/NLP/CV pragmatisti, ürün mimarı ve teknik dokümantasyon sorumlusu gibi davranacaksın.
+
+Bu görevin amacı mevcut “XNative Recursive Learning / Futbol Odaklı Yapay Zeka Destekli X İçerik Performans Sistemi” projesini baştan sona incelemek, bizim konuştuğumuz gerçek hedefe göre yeniden hizalamak, eksikleri tamamlamak, çalışan bir MVP hâline getirmek, optimizasyonları yapmak, testleri yazmak ve tüm belgeleri güncellemektir.
+
+## 0. Mutlak hedef
+
+Bu proje bir haber botu değildir.
+
+Amaç:
+Tek bir futbol odaklı X hesabı için X/Twitter’daki gerçek futbol kültürünü, kısa doğal dili, mizahı, tepki formatlarını, alıntı tweet davranışını, medya bağlamını ve performans geri bildirimini öğrenen; kullanıcıya paylaşım önerileri üreten; ancak ilk sürümde otomatik paylaşım yapmayan, insan onaylı, düşük maliyetli / ücretsiz çalışabilen bir içerik performans sistemidir.
+
+Sistem “haber dili” üretmeye çalışmayacak. “Habere benzeyen kurumsal metin”, “yapay zeka gibi açıklayıcı paragraf”, “basın bülteni tonu”, “fazla düzgün ve resmi cümle” üretmeyecek. Sistem X’teki futbol hesabı dilini öğrenecek: kısa, doğal, bağlama uygun, bazen reaksiyon, bazen alıntı tweet, bazen mizahi, bazen nötr, bazen taraftar refleksine yakın ama risk kontrollü.
+
+## 1. Kesin kısıtlar
+
+Aşağıdaki kurallar bağlayıcıdır:
+
+1. X API kullanılmayacak.
+
+   * Mevcut belgelerde X API geçiyorsa kaldır.
+   * Kodda X API, Twitter API, paid endpoint, bearer token, developer account gerektiren yapı varsa kaldır veya opsiyonel/kapsam dışı yap.
+   * Ana veri toplama yöntemi X API değil, kullanıcının açtığı görünür X sayfasından browser/extension/Playwright destekli okuma olmalı.
+
+2. Ücretli servis zorunlu olmayacak.
+
+   * Proje tamamen ücretsiz çalışabilmeli.
+   * Gemini, OpenAI, Claude, paid model API, ücretli proxy, ücretli scraper, ücretli hosting zorunlu olmayacak.
+   * Free-tier model kullanımı opsiyonel olabilir ama sistem onsuz da local fallback ile çalışmalı.
+   * .env içinde API key alanları varsa “optional” olarak işaretle ve çalışmanın bunlara bağlı olmadığını garanti et.
+
+3. Otomatik public action yapılmayacak.
+
+   * Otomatik tweet atma yok.
+   * Otomatik retweet yok.
+   * Otomatik like yok.
+   * Otomatik follow yok.
+   * Otomatik alıntı tweet yok.
+   * Sistem sadece önerir, kullanıcı onaylar.
+   * Kaynak hesaplar otomatik takip listesine eklenmez; aday olarak önerilir.
+
+4. X’e zarar veren veya kuralları ihlal edebilecek scraping yaklaşımı kullanılmayacak.
+
+   * Headless agresif scraping yok.
+   * Proxy döndürme yok.
+   * Rate limit aşmaya çalışma yok.
+   * Kullanıcının görünür oturumunda, kullanıcı başlatımlı veya düşük frekanslı izleme yapılacak.
+   * Login bilgisi toplanmayacak, saklanmayacak, loglanmayacak.
+
+5. RSS ana kaynak değil, destek kaynağıdır.
+
+   * RSS/haber kaynakları sadece doğrulama ve bağlam için yardımcı olabilir.
+   * Projenin ana odağı X postları, X medyası, alıntı postlar, hesap dili ve X kültürüdür.
+
+6. Overengineering yapılmayacak.
+
+   * İlk sürüm için gereksiz deep neural network training, fine-tuning, distributed infra, microservice karmaşası, Kubernetes, Kafka, ağır MLOps yok.
+   * Gerekirse NLP/CV kullanılacak ama en basit güvenilir çözüm tercih edilecek.
+   * Derin öğrenme sadece gerçek fayda sağladığı yerde opsiyonel modül olarak kullanılacak.
+   * İlk aşamada “eğitim” model fine-tuning değil; stil hafızası, embedding retrieval, performans ağırlığı güncelleme ve feedback loop olarak uygulanacak.
+
+## 2. Önce mevcut projeyi denetle
+
+İlk iş olarak repo ve belgeleri incele.
+
+İncelemen gerekenler:
+
+* README
+* project_board.md
+* teknik doküman
+* proje dokümanı
+* Dockerfile / docker-compose varsa
+* requirements / pyproject
+* app.py / main.py
+* backend
+* extension
+* analysis / trending / candidate / summarizer / translator benzeri modüller
+* test klasörü
+* veri modeli
+* örnek fixtures
+* kalite raporu
+* agent prompt dosyaları
+
+Denetimde şu soruları cevapla ve sonra kodu buna göre düzelt:
+
+* Proje hâlâ X API’ye bağlı mı?
+* Ücretli servis zorunlu mu?
+* “Haber dili” hedefi yanlışlıkla korunmuş mu?
+* X-native futbol hesabı dili öğreniliyor mu?
+* Görsel, video, quote tweet, alt text, OCR, medya hash, medya risk ve medya bağlamı gerçekten işleniyor mu?
+* Takip edilecek hesap adayları otomatik mi ekleniyor, yoksa insan onayına mı düşüyor?
+* Onay kuyruğu gerçekten var mı?
+* Performans öğrenmesi gerçek mi, yoksa sadece dokümanda mı?
+* Docker ile başlatılınca sistem ayağa kalkıyor mu?
+* Testler gerçekten çalışıyor mu?
+* Kod modüler mi, yoksa yüzeysel dosyalardan mı oluşuyor?
+* Sistem offline/sample fixture ile test edilebiliyor mu?
+* Gerçek X sayfası erişimi yoksa fixture üzerinden akış doğrulanıyor mu?
+
+## 3. Hedef mimari
+
+Projeyi aşağıdaki mimariye göre düzenle. Mevcut dosyalar uygunsa koru; değilse yeniden yapılandır.
+
+Önerilen klasör yapısı:
+
+```text
+xnative/
+  app/
+    api/
+      main.py
+      routes/
+        capture.py
+        suggestions.py
+        feedback.py
+        sources.py
+        media.py
+        health.py
+    core/
+      config.py
+      logging.py
+      errors.py
+      time.py
+      ids.py
+    capture/
+      browser_capture.py
+      dom_parser.py
+      screenshot_parser.py
+      x_post_schema.py
+      extension_contract.md
+    ingestion/
+      normalizer.py
+      dedup.py
+      cache.py
+      source_registry.py
+      event_builder.py
+    media/
+      media_store.py
+      phash.py
+      ocr.py
+      frame_sampler.py
+      media_features.py
+      media_risk.py
+      media_matcher.py
+    nlp/
+      text_cleaner.py
+      language_detector.py
+      style_memory.py
+      embeddings.py
+      tone_analyzer.py
+      quality_filter.py
+      ai_phrase_filter.py
+      quote_context.py
+    scoring/
+      event_score.py
+      account_candidate_score.py
+      source_reliability.py
+      risk_score.py
+      novelty_fatigue.py
+      final_decision_score.py
+    generation/
+      prompt_builder.py
+      draft_generator.py
+      template_fallback.py
+      llm_client.py
+      post_variants.py
+    learning/
+      feedback_store.py
+      online_weights.py
+      weekly_report.py
+      bandit.py
+    db/
+      database.py
+      models.py
+      migrations/
+      seed.py
+    ui/
+      streamlit_app.py
+    worker/
+      scheduler.py
+      jobs.py
+  extension/
+    manifest.json
+    content.js
+    background.js
+    popup.html
+    popup.js
+  tests/
+    unit/
+    integration/
+    fixtures/
+  docs/
+    PROJECT_DOCUMENT.md
+    TECHNICAL_DOCUMENT.md
+    ARCHITECTURE_DECISIONS.md
+    ZERO_COST_STRATEGY.md
+    TEST_PLAN.md
+    USER_GUIDE.md
+  docker/
+  docker-compose.yml
+  Dockerfile
+  .env.example
+  README.md
+  project_board.md
+```
+
+Bu yapının tamamını birebir oluşturmak zorunda değilsin; ancak fonksiyonlar bu mimari sorumluluklarına göre net ayrılmalı.
+
+## 4. Veri toplama stratejisi
+
+Ana kaynak X API olmayacak.
+
+Öncelik sırası:
+
+1. Browser extension / content script
+
+   * Kullanıcının açtığı X sayfasındaki post kartlarını DOM’dan oku.
+   * Post text, author handle, display name, timestamp, post URL, quote tweet text, quoted author, visible metrics, media URLs/preview, alt text varsa al.
+   * Otomatik scroll agresif yapılmasın.
+   * Kullanıcı capture başlatır veya düşük frekanslı izleme yapar.
+   * Aynı post tekrar alınmasın.
+
+2. Playwright persistent browser context
+
+   * Kullanıcı kendi tarayıcı oturumunu yönetir.
+   * Şifre/2FA hiçbir şekilde kod tarafından alınmaz.
+   * Login gerekirse kullanıcı browser’da kendi girer.
+   * Sistem sadece görünür sayfayı okur.
+   * Playwright modu opsiyonel ve dikkatli kullanılmalı.
+
+3. Manual import
+
+   * Kullanıcı post URL, ekran görüntüsü, metin veya JSON fixture yükleyebilmeli.
+   * Geliştirme/test için sample fixtures mutlaka olmalı.
+
+4. RSS / haber / maç verisi
+
+   * Sadece doğrulama ve bağlam.
+   * Asıl dil/stil öğrenme kaynağı değildir.
+
+Yasak:
+
+* X API zorunlu kullanım.
+* Ücretli scraper.
+* Proxy rotation.
+* Login credential capture.
+* Otomatik paylaşım/follow/like.
+
+## 5. Veri modeli
+
+SQLite ile başla. PostgreSQL + pgvector opsiyonel olsun.
+
+İlk sürümde SQLite yeterlidir. Gerekirse embedding için:
+
+* sqlite + numpy vector blob
+* sklearn NearestNeighbors
+* sqlite-vss opsiyonel
+* Postgres/pgvector sadece opsiyonel ileri seviye
+
+Gerekli tablolar:
+
+1. sources
+
+   * id
+   * handle
+   * display_name
+   * source_type: club, journalist, fan, stats, meme, global, candidate, unknown
+   * status: active, candidate, rejected, paused
+   * reliability_score
+   * risk_score
+   * early_signal_score
+   * language_style_tags
+   * last_seen_at
+   * created_at
+
+2. posts
+
+   * id
+   * platform_post_id
+   * url
+   * author_handle
+   * text
+   * normalized_text
+   * quoted_post_id
+   * captured_at
+   * post_time
+   * visible_metrics_json
+   * raw_json
+   * dedup_hash
+
+3. media_assets
+
+   * id
+   * post_id
+   * media_type: image, video, gif, unknown
+   * local_path
+   * source_url
+   * alt_text
+   * ocr_text
+   * phash
+   * clip_tags_json
+   * risk_label
+   * copyright_status: unknown, owned, permitted, risky
+   * created_at
+
+4. events
+
+   * id
+   * event_type: goal, transfer, official_statement, injury, referee, fan_reaction, meme, quote_context, match_moment, global_football, other
+   * title
+   * summary
+   * confidence
+   * source_count
+   * first_seen_at
+   * last_seen_at
+   * risk_score
+   * novelty_score
+
+5. suggestions
+
+   * id
+   * event_id
+   * suggestion_type: tweet, quote_tweet, reply, do_not_post
+   * text
+   * variant_label: reaction, dry_humor, neutral, fan_voice, short_take
+   * media_asset_id
+   * final_score
+   * quality_score
+   * risk_score
+   * status: pending, approved, rejected, needs_revision, archived
+   * created_at
+
+6. feedback
+
+   * id
+   * suggestion_id
+   * action: approved, rejected, edited, posted_manually, ignored
+   * edited_text
+   * reason
+   * metrics_json
+   * created_at
+
+7. style_examples
+
+   * id
+   * source_post_id
+   * text
+   * tone_tags
+   * performance_score
+   * embedding
+   * approved_for_style_memory
+   * created_at
+
+8. learning_weights
+
+   * key
+   * value
+   * updated_at
+
+9. audit_logs
+
+   * id
+   * action
+   * entity_type
+   * entity_id
+   * details_json
+   * created_at
+
+## 6. NLP yaklaşımı
+
+Overengineering yapma.
+
+İlk sürüm NLP bileşenleri:
+
+1. Text cleaning
+
+   * URL temizleme
+   * mention/hashtag koruma
+   * emoji koruma
+   * fazla boşluk
+   * quote context ayrımı
+   * Türkçe karakter koruma
+
+2. Language detection
+
+   * fastText varsa kullan.
+   * Yoksa langdetect fallback.
+   * Dil tespit hatası akışı kırmasın.
+
+3. Embedding
+
+   * Varsayılan: sentence-transformers ile küçük multilingual model.
+   * Öneri: paraphrase-multilingual-MiniLM-L12-v2 veya all-MiniLM-L6-v2.
+   * Model yoksa TF-IDF fallback.
+   * Embedding cache zorunlu.
+   * Aynı text tekrar embed edilmesin.
+
+4. Style memory
+
+   * Onaylanmış veya yüksek performanslı X postlarından örnek havuzu oluştur.
+   * Yeni olay için benzer stil örneklerini getir.
+   * Retrieval top_k: 5.
+   * Benzerlik: cosine similarity.
+   * Çok benzer/duplicate örnekleri filtrele.
+   * Haber dili değil, X-native kısa futbol dili hedefle.
+
+5. Tone analyzer
+
+   * Kurallı etiketlerle başla:
+
+     * reaction
+     * dry_humor
+     * fan_voice
+     * neutral_short
+     * quote_bait_without_clickbait
+     * ironic
+     * serious_risk
+   * Sonra feedback ile ağırlıklar güncellensin.
+
+6. Quality filter
+   AI kokan ifadeleri işaretle:
+
+   * “Bu bağlamda”
+   * “Özetle”
+   * “Dikkat çekici bir gelişme”
+   * “Futbolseverler için önemli”
+   * “Sosyal medyada gündem oldu”
+   * “Kritik bir gelişme yaşandı”
+   * “X platformunda”
+   * “taraftarlar ikiye bölündü” gibi klişe ve haberci ifadeler
+   * Çok açıklayıcı, uzun, resmi cümleler
+   * Gereksiz noktalama ve yapay emoji
+
+7. Draft generation
+
+   * Önce template + style retrieval ile çalış.
+   * LLM varsa sadece kalite artırma için opsiyonel.
+   * LLM yoksa sistem yine 3 öneri üretsin.
+   * Öneriler 280 karakter sınırına uygun olsun.
+   * Her olay için en az 3 varyant:
+
+     * kısa tepki
+     * alıntı tweet tonu
+     * nötr ama X dili
+   * Risk yüksekse “paylaşma / bekle / doğrula” önerisi üret.
+
+## 7. CV / medya yaklaşımı
+
+İlk sürümde ağır CV yapma. Gerekli ve hafif bileşenleri uygula.
+
+1. Medya dedup
+
+   * pHash / imagehash
+   * Complexity: her medya için O(1) hash; benzerlik için küçük arşivde O(n), büyürse LSH/VP-tree opsiyonel.
+   * Aynı görsel tekrar işlenmesin.
+
+2. OCR
+
+   * Öncelik DOM text ve alt text.
+   * OCR sadece:
+
+     * görselde metin olabilir
+     * alt text yok
+     * post metni yetersiz
+   * Tesseract / EasyOCR / PaddleOCR opsiyonel.
+   * OCR yoksa akış kırılmasın.
+
+3. Video
+
+   * Tam video analizi yok.
+   * İlk sürümde thumbnail veya 1-3 frame sample yeterli.
+   * ffmpeg/opencv opsiyonel.
+   * Ağır frame extraction yapma.
+
+4. Image-text matching
+
+   * CLIP/open_clip opsiyonel.
+   * Eğer model kurulamazsa:
+
+     * alt text
+     * OCR text
+     * filename/url hints
+     * user-provided tags
+     * pHash clusters
+       ile çalış.
+   * Ama mimaride CLIP opsiyonel plug-in olarak hazır olsun.
+
+5. Medya risk
+
+   * copyright unknown ise otomatik paylaşım önerisi riskli say.
+   * Medya önerileri “kullan”, “kontrol et”, “kullanma” olarak işaretlenmeli.
+   * Medya indirme sınırlı ve cache kontrollü olsun.
+   * Sınırsız medya arşivleme yok.
+
+6. Belalcaggins benzeri test
+
+   * Bir hesap açıkça futbol hesabı olmasa bile futbol içeriği paylaşıyor olabilir.
+   * Sadece keyword ile karar verme.
+   * Şu sinyalleri birlikte kullan:
+
+     * post text
+     * quote tweet text
+     * medya alt text
+     * OCR text
+     * görsel tag/CLIP tag
+     * futbol hesaplarıyla etkileşim
+     * kullanılan emoji / maç günü dili
+     * benzer stil örnekleri
+   * Sonuç: “kaynak aday puanı” ve “neden aday?” açıklaması ver.
+
+## 8. Skor algoritmaları
+
+Aşağıdaki algoritmaları uygula veya mevcutsa düzelt.
+
+### 8.1 Event score
+
+Amaç: olay paylaşmaya değer mi?
+
+Önerilen formül:
+
+event_score =
+0.25 * source_reliability
+
+* 0.20 * source_count_score
+* 0.15 * velocity_score
+* 0.15 * relevance_score
+* 0.10 * novelty_score
+* 0.10 * media_context_score
+
+- 0.20 * risk_score
+- 0.10 * fatigue_score
+
+Normalize et: 0-100.
+
+Açıklanabilir olmalı:
+
+* hangi sinyal kaç puan verdi
+* hangi risk puan kırdı
+* neden önerildi / neden önerilmedi
+
+### 8.2 Source reliability
+
+Başlangıçta kurallı:
+
+* official club: yüksek
+* güvenilir gazeteci: yüksek
+* taraftar hesabı: orta/düşük
+* yeni aday: düşük/unknown
+* geçmiş yanlış bilgi: ceza
+* erken doğru sinyal: ödül
+* yüksek etkileşim ama riskli dil: ayrı risk
+
+Feedback ile güncelle:
+new_score = old_score * 0.85 + observed_score * 0.15
+
+### 8.3 Account candidate score
+
+Aday takip hesabı için:
+
+candidate_score =
+0.25 * football_relevance
+
+* 0.20 * early_signal_quality
+* 0.15 * media_context_quality
+* 0.15 * quote_context_quality
+* 0.10 * language_style_fit
+* 0.10 * engagement_quality
+
+- 0.20 * misinformation_risk
+- 0.10 * toxicity_risk
+
+Sonuç:
+
+* auto-follow yok
+* “Aday olarak ekle”
+* “Reddet”
+* “1 hafta izle”
+* açıklama ve örnek postlarla birlikte göster
+
+### 8.4 Novelty / fatigue
+
+Aynı konu çok tekrarlandıysa düşür.
+
+* Text similarity > 0.85 ise duplicate/near-duplicate
+* Aynı oyuncu/kulüp/olay 2 saat içinde çok tekrarlandıysa fatigue artır
+* Aynı medya pHash benzerliği yüksekse tekrar say
+* Çok sık aynı formatta öneri üretme
+
+### 8.5 Style selection
+
+Yeni olay için:
+
+1. event_type belirle
+2. risk seviyesini belirle
+3. style memory’den benzer 5 örnek getir
+4. başarılı tonları ağırlıklandır
+5. 3 varyant üret
+6. quality filter’dan geçir
+7. risk filter’dan geçir
+8. onay kuyruğuna ekle
+
+### 8.6 Learning
+
+İlk sürümde model fine-tuning yapma.
+
+Online learning:
+
+* Kullanıcı onayladıysa ilgili ton, kaynak, medya tipi, event_type ağırlığını artır.
+* Reddettiyse azalt.
+* Revize ettiyse edited_text’i style_memory’ye aday olarak ekle.
+* Postlandıktan sonra performans metrikleri girilirse ödül sinyali üret.
+
+Önerilen basit update:
+weight_new = clamp(weight_old + learning_rate * reward * feature_value, min, max)
+
+Learning rate: 0.03-0.10 arası.
+
+Contextual bandit opsiyonel:
+
+* Thompson Sampling veya epsilon-greedy.
+* İlk sürümde epsilon-greedy yeterli.
+* Amaç: ton/format/media kombinasyonlarını kontrollü denemek.
+
+## 9. Performans ve optimizasyon
+
+Zorunlu optimizasyonlar:
+
+1. Cache
+
+   * post dedup hash
+   * media pHash
+   * OCR result cache
+   * embedding cache
+   * LLM response cache, varsa
+   * source profile cache
+
+2. Complexity hedefleri
+
+   * N post ingest: O(N)
+   * dedup lookup: O(1)
+   * keyword/rule scoring: O(N*K), K küçük kalmalı
+   * embedding search küçük veri için O(N*d), büyürse sklearn NearestNeighbors / FAISS opsiyonel
+   * media pHash lookup küçük veri için O(M), büyürse bucket/LSH
+   * dashboard query pagination zorunlu
+
+3. Async / worker
+
+   * UI thread bloklanmasın.
+   * Capture hızlı dönsün.
+   * OCR/embedding/LLM gibi pahalı işler background worker queue’ya alınsın.
+   * İlk sürümde Redis/Celery zorunlu değil; SQLite job queue veya APScheduler yeterli.
+
+4. Rate limiting
+
+   * Browser capture düşük frekanslı olsun.
+   * Aynı sayfa tekrar tekrar parse edilmesin.
+   * Circuit breaker: X sayfası parse hatası artarsa dur.
+
+5. Memory
+
+   * Büyük medya dosyalarını sınırsız tutma.
+   * Thumbnail ve metadata öncelikli.
+   * Video frame sayısı sınırlı.
+   * Embedding model lazy-load.
+
+6. Docker
+
+   * docker compose up ile çalışmalı.
+   * En az şu servisler:
+
+     * api
+     * ui
+     * worker
+     * db veya sqlite volume
+   * .env.example olmalı.
+   * Local volume: data/, media_cache/, logs/.
+   * API key olmadan sample mode çalışmalı.
+
+## 10. Error handling ve logging
+
+Her modülde şu standartları uygula:
+
+* typed exceptions
+* retry + exponential backoff
+* timeout
+* graceful fallback
+* structured logging
+* no silent fail
+* user-facing error message
+* audit log
+
+Örnek:
+
+* OCR yoksa: “OCR unavailable, used alt_text/text fallback.”
+* embedding model yoksa: “Embedding unavailable, used TF-IDF fallback.”
+* LLM yoksa: “LLM unavailable, used template fallback.”
+* X page parse bozulursa: “DOM parser failed, screenshot/manual import required.”
+* DB locked olursa retry.
+* Duplicate post ise ingest etme ama logla.
+
+## 11. UI / panel
+
+Streamlit paneli gerçek iş akışını göstermeli.
+
+Sayfalar:
+
+1. Dashboard
+
+   * yeni yakalanan olaylar
+   * pending suggestions
+   * riskli öneriler
+   * kaynak adayları
+   * son çalışma zamanı
+   * sistem sağlığı
+
+2. Capture Inbox
+
+   * yakalanan X postları
+   * quote context
+   * medya preview / alt text / OCR
+   * dedup durumu
+
+3. Suggestions Queue
+
+   * 3 tweet varyantı
+   * quote tweet önerisi
+   * medya adayı
+   * skor açıklaması
+   * approve/reject/revise/ignore
+   * “neden bu önerildi?” açıklaması
+
+4. Source Candidates
+
+   * aday hesaplar
+   * aday puanı
+   * örnek postlar
+   * neden aday?
+   * approve as source / watch / reject
+
+5. Style Memory
+
+   * onaylı başarılı örnekler
+   * ton etiketleri
+   * benzerlik testleri
+   * yanlış örnekleri çıkarma
+
+6. Reports
+
+   * haftalık öğrenme
+   * başarılı tonlar
+   * başarısız tonlar
+   * en iyi event_type
+   * en iyi medya tipi
+   * risk özetleri
+
+7. Settings
+
+   * free-tier mode
+   * no-API mode
+   * model settings
+   * thresholds
+   * source lists
+   * blocked phrases
+
+## 12. Testler
+
+Zorunlu testler:
+
+Unit:
+
+* text_cleaner
+* dedup hash
+* pHash duplicate
+* OCR fallback mock
+* embedding fallback mock
+* style retrieval
+* ai phrase filter
+* quality filter
+* risk score
+* event score
+* source candidate score
+* learning weight update
+* final decision score
+
+Integration:
+
+* sample X post fixture ingest
+* quote tweet fixture ingest
+* image alt text + OCR fixture
+* belalcaggins-like mixed account fixture
+* suggestion generation without LLM
+* suggestion approval -> learning update
+* weekly report generation
+* docker compose health check
+
+Acceptance:
+
+* `docker compose up` çalışmalı.
+* `pytest` geçmeli.
+* API key olmadan sample mode çalışmalı.
+* En az 10 fixture post üzerinden öneri üretmeli.
+* En az 1 medya + OCR fixture işlenmeli.
+* En az 1 quote tweet context işlenmeli.
+* En az 1 kaynak adayı önerilmeli.
+* Hiçbir public action otomatik yapılmamalı.
+* X API dependency bulunmamalı.
+* Paid service dependency bulunmamalı.
+
+## 13. Belgeleri düzelt
+
+Belgelerdeki tüm çelişkileri düzelt.
+
+Özellikle:
+
+* “X API” ana teknoloji olarak geçiyorsa kaldır.
+* “Gemini zorunlu” gibi ifade varsa kaldır.
+* “haber dili” ifadesi varsa kaldır veya “X-native futbol hesabı dili” olarak değiştir.
+* RSS ana kaynak gibi anlatıldıysa destek kaynak yap.
+* Maliyet bölümünü tamamen revize et:
+
+  * local mode: $0
+  * optional free-tier Gemini: $0, kota sınırlı
+  * optional hosting yok
+  * X API yok
+  * paid proxy yok
+* Teknik dokümanda browser extension / Playwright visible browser capture anlatılmalı.
+* Veri modeli yukarıdaki tabloları içermeli.
+* Test planı gerçek pytest/docker acceptance testleri içermeli.
+* Risk bölümünde platform uyumu, telif, yanlış bilgi, otomatik aksiyon yasağı, model fallbackleri yer almalı.
+* Project board gerçek ilerleme durumuna göre güncellenmeli.
+
+Oluştur/güncelle:
+
+* README.md
+* docs/PROJECT_DOCUMENT.md
+* docs/TECHNICAL_DOCUMENT.md
+* docs/ZERO_COST_STRATEGY.md
+* docs/ARCHITECTURE_DECISIONS.md
+* docs/TEST_PLAN.md
+* docs/USER_GUIDE.md
+* project_board.md
+* AGENT_IMPLEMENTATION_REPORT.md
+* FINAL_QA_REPORT.md
+
+## 14. Kod aksiyon sırası
+
+Şu sırayla çalış:
+
+1. Repo ve belge denetimi yap.
+2. Sorun listesini çıkar ve AGENT_IMPLEMENTATION_REPORT.md içine yaz.
+3. X API / paid service bağımlılıklarını kaldır.
+4. Config sistemini düzelt.
+5. DB modellerini ve migration/seed yapısını oluştur.
+6. Capture schema ve DOM parser contract oluştur.
+7. Ingestion + dedup + cache yap.
+8. NLP/style memory/quality filter yap.
+9. Media pHash/OCR/fallback yap.
+10. Scoring modüllerini yap.
+11. Generation modülünü template fallback + optional LLM şeklinde yap.
+12. Feedback/learning loop yap.
+13. Streamlit UI’yı gerçek workflow’a bağla.
+14. Tests/fixtures yaz.
+15. Docker/Docker Compose düzelt.
+16. Belgeleri güncelle.
+17. Testleri çalıştır.
+18. Final QA raporu yaz.
+19. Çalıştırma komutlarını README’ye koy.
+
+## 15. LLM / model seçimleri
+
+Model seçiminde öncelik:
+
+1. No model fallback
+
+   * templates
+   * rules
+   * style examples
+   * TF-IDF
+   * pHash
+   * OCR optional
+
+2. Local lightweight models
+
+   * sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+   * all-MiniLM-L6-v2
+   * fastText language detection
+   * Tesseract OCR
+   * open_clip optional
+
+3. Free-tier optional
+
+   * Gemini free tier sadece opsiyonel draft refinement için.
+   * Kota aşılırsa template fallback.
+   * API key yoksa sistem durmayacak.
+
+Kullanılmayacak:
+
+* Zorunlu paid OpenAI/Claude/Gemini
+* Zorunlu X API
+* Ağır fine-tuning
+* GPU zorunluluğu
+* “BART haber özeti” ana üretim dili olarak kullanılmayacak.
+
+## 16. Üretim dili kuralları
+
+Generated suggestions şu kurallara uymalı:
+
+* Türkçe X futbol dili.
+* Kısa.
+* Bağlama duyarlı.
+* Haber metni gibi değil.
+* Fazla açıklama yok.
+* Fazla resmi değil.
+* Yapay zeka gibi değil.
+* Gereksiz emoji yok.
+* Gereksiz hashtag yok.
+* Kaynaksız kesin iddia yok.
+* Riskli olayda kesin hüküm yok.
+* Alıntı tweet için bağlama cevap verir.
+* Medya varsa metin medya ruhuna uyumlu olur.
+* Telif/risk belirsizse medya önerilmez.
+
+Örnek varyant formatı:
+
+* reaction: “Bu pozisyon daha çok konuşulur.”
+* dry_humor: “Dakika 70, senaryo yine aynı.”
+* neutral_short: “Galatasaray cephesinde gündem bu pozisyona döndü.”
+* quote_context: “Burada asıl mesele karar değil, standardın değişmesi.”
+
+Kötü örnekleri filtrele:
+
+* “Futbol dünyasında gündem yaratan bu gelişme…”
+* “Taraftarlar bu olay karşısında ikiye bölündü.”
+* “Bu bağlamda önemli bir gelişme yaşandı.”
+* “X platformunda büyük yankı uyandırdı.”
+* “Sosyal medyada çok konuşulan bu olay…”
+
+## 17. Final teslim formatı
+
+İş bitince şu çıktıları üret:
+
+1. Çalışan repo.
+2. Docker ile çalıştırma:
+
+   * `cp .env.example .env`
+   * `docker compose up --build`
+   * UI URL
+   * API health URL
+3. Test komutu:
+
+   * `pytest`
+4. Sample mode komutu:
+
+   * fixture verisiyle öneri üretme
+5. Güncellenmiş belgeler.
+6. Final QA raporu.
+7. Kalan riskler ve yapılmayan şeyler.
+8. Project board güncel durum.
+9. Net doğrulama:
+
+   * X API yok.
+   * Paid service zorunlu yok.
+   * Otomatik public action yok.
+   * İnsan onayı var.
+   * Sample mode çalışıyor.
+   * Docker çalışıyor.
+   * Tests pass.
+
+## 18. Kalite standardı
+
+Bu işi “dosyaları biraz düzenledim” seviyesinde bırakma.
+
+Kabul edilmeyecek sonuçlar:
+
+* Sadece README güncellemesi.
+* Sadece yüzeysel modül eklemek.
+* X API bağımlılığını korumak.
+* Haber dili üretimini korumak.
+* Docker çalışmaması.
+* Test olmaması.
+* UI’nın gerçek workflow’a bağlı olmaması.
+* “Future work” diye ana fonksiyonları ertelemek.
+* Paid API olmadan sistemin çalışmaması.
+* Görsel/quote/media bağlamını sadece dokümanda anlatıp kodlamamak.
+
+Ana hedef:
+Başlatıldığında sample fixture ile çalışan, gerçek X oturumunda kullanıcı başlatımlı capture yapabilecek şekilde tasarlanmış, öneri üreten, insan onayı alan, feedback ile öğrenen, ücretsiz/local-first X-native futbol içerik performans sistemi.
+
+Çalışmaya başla. Önce mevcut durum denetimini yap, sonra kodu ve belgeleri düzelt, testleri çalıştır, final raporu üret.

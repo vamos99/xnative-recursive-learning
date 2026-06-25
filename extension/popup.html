@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>XNative Extension</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        width: 220px;
+        padding: 10px;
+      }
+      h2 {
+        margin-top: 0;
+      }
+      label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>XNative</h2>
+    <label>
+      <input type="checkbox" id="captureToggle" />
+      Enable capture
+    </label>
+    <p id="status" style="font-size: 12px; color: #555;"></p>
+    <script src="popup.js"></script>
+  </body>
+</html>

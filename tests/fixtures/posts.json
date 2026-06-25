@@ -1,0 +1,14 @@
+{
+  "posts": [
+    {"id":"p1","url":"https://x.com/a/status/1","author_handle":"sporcu1","text":"Bu pozisyon daha çok konuşulur. Galatasaray maçında penaltı tartışması.","quoted_text":"Hakem kararları yine gündem.","media":[{"type":"image","url":"https://example.com/1.jpg","alt_text":"Futbol sahasında penaltı pozisyonu"}],"visible_metrics":{"likes":"120"}},
+    {"id":"p2","url":"https://x.com/b/status/2","author_handle":"belalcaggins_like","text":"Dakika 70, senaryo yine aynı 😂","quoted_text":"Fenerbahçe maçında tartışmalı karar","media":[{"type":"image","url":"https://example.com/2.jpg","alt_text":"Stadyumda hakem ve oyuncular"}],"visible_metrics":{"likes":"500"}},
+    {"id":"p3","url":"https://x.com/c/status/3","author_handle":"officialclub","text":"Takımımızın maç kadrosu açıklandı.","media":[],"visible_metrics":{"likes":"300"}},
+    {"id":"p4","url":"https://x.com/d/status/4","author_handle":"transferci","text":"Transfer iddiası: genç oyuncu için görüşmeler başladı.","media":[],"visible_metrics":{"likes":"220"}},
+    {"id":"p5","url":"https://x.com/e/status/5","author_handle":"stats","text":"Derbide ilk 30 dakikada şut dengesi değişti.","media":[],"visible_metrics":{"likes":"90"}},
+    {"id":"p6","url":"https://x.com/f/status/6","author_handle":"fanvoice","text":"Bunu maçtan sonra tekrar açarlar.","media":[],"visible_metrics":{"likes":"60"}},
+    {"id":"p7","url":"https://x.com/g/status/7","author_handle":"memeacc","text":"Bir futbol akşamı daha sakin geçmedi.","media":[{"type":"image","url":"https://example.com/7.jpg","alt_text":"Taraftar reaksiyon görseli"}],"visible_metrics":{"likes":"180"}},
+    {"id":"p8","url":"https://x.com/h/status/8","author_handle":"journalist","text":"Sakatlık iddiası doğrulanmadı, kulüp açıklaması bekleniyor.","media":[],"visible_metrics":{"likes":"130"}},
+    {"id":"p9","url":"https://x.com/i/status/9","author_handle":"globalball","text":"Champions League finalinde kırmızı kart sonrası oyun değişti.","media":[],"visible_metrics":{"likes":"300"}},
+    {"id":"p10","url":"https://x.com/j/status/10","author_handle":"futbolmizah","text":"Bu görüntü tek başına gündem olur.","media":[{"type":"image","url":"https://example.com/10.jpg","alt_text":"Futbolcu şaşkın reaksiyon"}],"visible_metrics":{"likes":"410"}}
+  ]
+}

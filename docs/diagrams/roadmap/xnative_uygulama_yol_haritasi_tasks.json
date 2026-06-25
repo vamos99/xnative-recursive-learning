@@ -1,0 +1,211 @@
+[
+  {
+    "id": "P0",
+    "name": "Baseline ve yonetisim",
+    "group": "Foundation",
+    "parent": "",
+    "start": "2026-06-22",
+    "end": "2026-06-24",
+    "duration": 3,
+    "depends": [],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P1",
+    "name": "Veri omurgasi",
+    "group": "Foundation",
+    "parent": "",
+    "start": "2026-06-25",
+    "end": "2026-06-29",
+    "duration": 5,
+    "depends": [
+      "P0"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P2",
+    "name": "Guvenilir capture",
+    "group": "Ingestion",
+    "parent": "",
+    "start": "2026-06-30",
+    "end": "2026-07-04",
+    "duration": 5,
+    "depends": [
+      "P1"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P3",
+    "name": "Queue ve pipeline",
+    "group": "Ingestion",
+    "parent": "",
+    "start": "2026-07-05",
+    "end": "2026-07-10",
+    "duration": 6,
+    "depends": [
+      "P2"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P4",
+    "name": "Medya ve arsiv",
+    "group": "Intelligence",
+    "parent": "",
+    "start": "2026-07-11",
+    "end": "2026-07-15",
+    "duration": 5,
+    "depends": [
+      "P3"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P5",
+    "name": "Multimodal anlama",
+    "group": "Intelligence",
+    "parent": "",
+    "start": "2026-07-16",
+    "end": "2026-07-25",
+    "duration": 10,
+    "depends": [
+      "P4"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P6",
+    "name": "Olay bellegi",
+    "group": "Intelligence",
+    "parent": "",
+    "start": "2026-07-26",
+    "end": "2026-08-01",
+    "duration": 7,
+    "depends": [
+      "P5"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P7",
+    "name": "Kaynak ogrenimi",
+    "group": "Recommendation",
+    "parent": "",
+    "start": "2026-08-02",
+    "end": "2026-08-07",
+    "duration": 6,
+    "depends": [
+      "P6"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P8",
+    "name": "Cok hedefli ranking",
+    "group": "Recommendation",
+    "parent": "",
+    "start": "2026-08-08",
+    "end": "2026-08-15",
+    "duration": 8,
+    "depends": [
+      "P6",
+      "P7"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P9",
+    "name": "Taslak ve guvenlik",
+    "group": "Recommendation",
+    "parent": "",
+    "start": "2026-08-16",
+    "end": "2026-08-21",
+    "duration": 6,
+    "depends": [
+      "P8"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P10",
+    "name": "Feedback ve learning",
+    "group": "Learning",
+    "parent": "",
+    "start": "2026-08-22",
+    "end": "2026-08-29",
+    "duration": 8,
+    "depends": [
+      "P9"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P11",
+    "name": "Review UI",
+    "group": "Product",
+    "parent": "",
+    "start": "2026-08-30",
+    "end": "2026-09-06",
+    "duration": 8,
+    "depends": [
+      "P10"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P12",
+    "name": "Performans ve guvenlik",
+    "group": "Hardening",
+    "parent": "",
+    "start": "2026-09-07",
+    "end": "2026-09-12",
+    "duration": 6,
+    "depends": [
+      "P11"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P13",
+    "name": "Release testleri",
+    "group": "Hardening",
+    "parent": "",
+    "start": "2026-09-13",
+    "end": "2026-09-17",
+    "duration": 5,
+    "depends": [
+      "P12"
+    ],
+    "owner": "",
+    "milestone": false
+  },
+  {
+    "id": "P14",
+    "name": "Final belgeler",
+    "group": "Delivery",
+    "parent": "",
+    "start": "2026-09-18",
+    "end": "2026-09-18",
+    "duration": 1,
+    "depends": [
+      "P13"
+    ],
+    "owner": "",
+    "milestone": true
+  }
+]

@@ -1,0 +1,21 @@
+sequenceDiagram
+    actor User as Hesap sahibi
+    participant X as X sayfasi
+    participant Ext as Extension
+    participant Outbox as Local outbox
+    participant API as FastAPI
+    participant DB as SQLite
+    participant Worker as Worker
+
+    User->>X: Sayfayi manuel acar
+    Ext->>X: Yalniz gorunur DOM'u okur
+    Ext->>Outbox: Payload + idempotency key
+    Outbox->>API: POST /capture
+    API->>DB: Inbox ve job transaction
+    DB-->>API: Commit
+    API-->>Outbox: 202 accepted
+    Outbox->>Outbox: Teslim kaydini sil
+    Worker->>DB: Pending job claim
+    Worker->>DB: Feature/event/suggestion yaz
+    DB-->>Worker: Commit ve audit
+    Note over Outbox,API: Hata halinde exponential backoff; kayit silinmez

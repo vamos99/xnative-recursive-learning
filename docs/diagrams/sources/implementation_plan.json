@@ -1,0 +1,20 @@
+{
+  "title": "XNative Uygulama Yol Haritasi",
+  "tasks": [
+    {"id": "P0", "name": "Baseline ve yonetisim", "group": "Foundation", "start": "2026-06-22", "duration": 3, "milestone": false},
+    {"id": "P1", "name": "Veri omurgasi", "group": "Foundation", "duration": 5, "depends": ["P0"]},
+    {"id": "P2", "name": "Guvenilir capture", "group": "Ingestion", "duration": 5, "depends": ["P1"]},
+    {"id": "P3", "name": "Queue ve pipeline", "group": "Ingestion", "duration": 6, "depends": ["P2"]},
+    {"id": "P4", "name": "Medya ve arsiv", "group": "Intelligence", "duration": 5, "depends": ["P3"]},
+    {"id": "P5", "name": "Multimodal anlama", "group": "Intelligence", "duration": 10, "depends": ["P4"]},
+    {"id": "P6", "name": "Olay bellegi", "group": "Intelligence", "duration": 7, "depends": ["P5"]},
+    {"id": "P7", "name": "Kaynak ogrenimi", "group": "Recommendation", "duration": 6, "depends": ["P6"]},
+    {"id": "P8", "name": "Cok hedefli ranking", "group": "Recommendation", "duration": 8, "depends": ["P6", "P7"]},
+    {"id": "P9", "name": "Taslak ve guvenlik", "group": "Recommendation", "duration": 6, "depends": ["P8"]},
+    {"id": "P10", "name": "Feedback ve learning", "group": "Learning", "duration": 8, "depends": ["P9"]},
+    {"id": "P11", "name": "Review UI", "group": "Product", "duration": 8, "depends": ["P10"]},
+    {"id": "P12", "name": "Performans ve guvenlik", "group": "Hardening", "duration": 6, "depends": ["P11"]},
+    {"id": "P13", "name": "Release testleri", "group": "Hardening", "duration": 5, "depends": ["P12"]},
+    {"id": "P14", "name": "Final belgeler", "group": "Delivery", "duration": 4, "depends": ["P13"], "milestone": true}
+  ]
+}

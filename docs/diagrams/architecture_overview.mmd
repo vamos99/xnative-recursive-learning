@@ -1,0 +1,26 @@
+flowchart LR
+    U["Hesap sahibi"]
+    X["Gorunur X sayfasi"]
+    E["Browser extension ve local outbox"]
+    A["Local FastAPI capture"]
+    Q["SQLite job queue"]
+    S[("SQLite FTS5 ve audit")]
+    M[("Content-addressed medya")]
+    F["NLP CV OCR ASR feature pipeline"]
+    G["Event ve entity memory"]
+    R["Hybrid retrieval ve multi-objective ranker"]
+    D["Taslak uretimi ve policy filters"]
+    UI["Review workspace"]
+    L["Feedback evaluation ve model registry"]
+    P["Opsiyonel free-tier adapter"]
+
+    X --> E --> A --> Q
+    A --> S
+    Q --> F
+    F --> S
+    F --> M
+    F --> G --> R --> D --> UI
+    P -. "yalniz fallback" .-> F
+    U --> UI
+    UI --> L --> R
+    UI -. "manuel yayin/takip" .-> X

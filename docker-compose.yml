@@ -1,0 +1,27 @@
+services:
+  api:
+    build: .
+    command: uvicorn xnative.api.main:app --host 0.0.0.0 --port 8000
+    ports: ["8000:8000"]
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./media_cache:/app/media_cache
+      - ./logs:/app/logs
+  ui:
+    build: .
+    command: streamlit run xnative/ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    ports: ["8501:8501"]
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./media_cache:/app/media_cache
+      - ./logs:/app/logs
+  worker:
+    build: .
+    command: python -m xnative.sample_pipeline
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./media_cache:/app/media_cache
+      - ./logs:/app/logs

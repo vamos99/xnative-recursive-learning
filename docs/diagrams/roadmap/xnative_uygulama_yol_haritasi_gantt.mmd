@@ -1,0 +1,27 @@
+gantt
+    title XNative Uygulama Yol Haritasi
+    dateFormat  YYYY-MM-DD
+    axisFormat  %d %b
+    section Foundation
+    Baseline ve yonetisim :crit, P0, 2026-06-22, 3d
+    Veri omurgasi :crit, P1, after P0, 5d
+    section Ingestion
+    Guvenilir capture :crit, P2, after P1, 5d
+    Queue ve pipeline :crit, P3, after P2, 6d
+    section Intelligence
+    Medya ve arsiv :crit, P4, after P3, 5d
+    Multimodal anlama :crit, P5, after P4, 10d
+    Olay bellegi :crit, P6, after P5, 7d
+    section Recommendation
+    Kaynak ogrenimi :crit, P7, after P6, 6d
+    Cok hedefli ranking :crit, P8, after P7, 8d
+    Taslak ve guvenlik :crit, P9, after P8, 6d
+    section Learning
+    Feedback ve learning :crit, P10, after P9, 8d
+    section Product
+    Review UI :crit, P11, after P10, 8d
+    section Hardening
+    Performans ve guvenlik :crit, P12, after P11, 6d
+    Release testleri :crit, P13, after P12, 5d
+    section Delivery
+    Final belgeler :milestone, crit, P14, after P13, 1d

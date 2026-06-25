@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Runtime data
+data/*.sqlite3
+data/*.sqlite3-*
+data/media/*
+data/logs/*
+media_cache/*
+logs/*
+!data/.gitkeep
+!data/media/.gitkeep
+!data/logs/.gitkeep
+!media_cache/.gitkeep
+!logs/.gitkeep
+
+# Models and generated caches
+.cache/
+models/
+
+# Document QA intermediates
+tmp/
+docs/archive/
+docs/generated/
+
+# Local/private notes
+notes/
+private_notes/
+*.local.md
+NOTES.local.md
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/

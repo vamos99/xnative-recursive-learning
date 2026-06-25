@@ -1,0 +1,25 @@
+flowchart LR
+    %% XNative Veri Akisi - Level 1 - 1.0 Capture ve Ingestion
+    user[["Hesap sahibi"]]
+    xdom[["Gorunur X sayfasi"]]
+    boundary_p2_1[["2.1 Metin ve quote analizi"]]
+    boundary_p2_2[["2.2 Medya OCR CV ASR"]]
+    subgraph g1["1.0 Capture ve Ingestion"]
+        p1_1(("1.1 Gorunur postu yakala"))
+        p1_2(("1.2 Dogrula ve tekillestir"))
+        p1_3(("1.3 Kuyruga al"))
+    end
+    d1[("D1 SQLite ve audit")]
+    xdom -->|"gorunur DOM verisi"| p1_1
+    user -->|"capture ac/kapat"| p1_1
+    p1_1 -->|"versionlanmis payload"| p1_2
+    p1_2 -->|"post ve provenance"| d1
+    p1_2 -->|"idempotent is"| p1_3
+    p1_3 -->|"text isi"| boundary_p2_1
+    p1_3 -->|"medya isi"| boundary_p2_2
+    classDef external fill:#fff2cc,stroke:#d6b656,stroke-width:2px;
+    classDef store fill:#d5e8d4,stroke:#82b366,stroke-width:2px;
+    classDef group1 fill:#e8f1fb,stroke:#3973ac,stroke-width:2px;
+    class p1_1,p1_2,p1_3 group1;
+    class user,xdom,boundary_p2_1,boundary_p2_2 external;
+    class d1 store;
