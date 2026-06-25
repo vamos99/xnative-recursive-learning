@@ -6,7 +6,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 
 | Gereksinim | Backlog | Mevcut durum | Zorunlu kanit |
 |---|---|---|---|
-| X API olmadan capture | P2-001..007 | API capture route'u DB'ye yaziyor; payload/validation siniri, parser hygiene, manual archive ve extension localhost outbox/retry var; gercek Chrome DOM fixture E2E henuz eksik | `tests/integration/test_phase2_api_capture.py` + extension -> API -> DB E2E |
+| X API olmadan capture | P2-001..007 | API capture route'u DB'ye yaziyor; payload/validation siniri, parser hygiene, recorded DOM payload fixture, manual archive ve extension localhost outbox/retry var; gercek Chrome content-script E2E henuz eksik | `tests/integration/test_phase2_api_capture.py` + browser content-script -> API -> DB E2E |
 | API key olmadan sample | P0-004, P3 | Kismen calisiyor | Temiz kurulum acceptance |
 | Yerel SQLite | P1 | Phase 1 veri omurgasi tamam: checksum migration, WAL/PRAGMA, repository/UoW ve FK testleri var | `tests/integration/test_phase1_storage.py` + P1-DB-001..005 |
 | Dedup | P1, P3, P4 | Capture idempotency DB seviyesinde tamam; ingestion/media dedup sonraki fazlarda | Idempotency integration + P3/P4 pipeline testleri |

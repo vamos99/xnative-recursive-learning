@@ -1,0 +1,52 @@
+{
+  "posts": [
+    {
+      "id": "1840000000000000300",
+      "url": "https://x.com/example/status/1840000000000000300?s=20&t=private",
+      "author_handle": "@Example",
+      "display_name": "Example @Example",
+      "text": "Kanat değişimi sonrası pres tetikleniyor.",
+      "timestamp": "2026-06-25T09:30:00Z",
+      "visible_metrics": {
+        "12 likes": "12",
+        "3 reposts": "3",
+        "1,204 views": "1,204"
+      },
+      "quoted_text": "Rakip bek çizgiye basınca merkez boşalıyor.",
+      "quoted_author": "@Analyst",
+      "quoted_url": "https://x.com/analyst/status/1840000000000000200?ref=quote",
+      "media": [
+        {
+          "type": "image",
+          "url": "https://pbs.twimg.com/profile_images/avatar.jpg",
+          "alt_text": "profile avatar",
+          "media_scope": "avatar"
+        },
+        {
+          "type": "image",
+          "url": "https://pbs.twimg.com/media/main-post.jpg?format=jpg&name=small",
+          "alt_text": "Futbol sahasında pres anı",
+          "media_scope": "post"
+        },
+        {
+          "type": "image",
+          "url": "https://pbs.twimg.com/media/quote-context.jpg?format=jpg&name=small",
+          "alt_text": "Quote içindeki taktik ekran görüntüsü",
+          "media_scope": "quote"
+        }
+      ],
+      "parse_quality": {
+        "selector_version": "visible_dom_fixture_v2",
+        "has_url": true,
+        "has_author": true,
+        "has_text": true,
+        "has_quote": true,
+        "media_count": 2
+      },
+      "authorization": "Bearer should-not-be-stored",
+      "nested": {
+        "csrf_token": "private"
+      }
+    }
+  ]
+}

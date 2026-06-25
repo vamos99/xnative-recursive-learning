@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from xnative.api.main import create_app
 from xnative.capture.dom_parser import parse_extension_payload
-from xnative.capture.manual_import import archive_fixture
+from xnative.capture.manual_import import archive_fixture, load_fixture
 from xnative.db.database import init_db
+
+FIXTURES = Path(__file__).resolve().parents[1] / "fixtures"
 
 
 def payload(post_id: str = "1840000000000000100") -> dict[str, object]:
@@ -181,3 +185,39 @@ def test_manual_archive_fixture_persists_without_external_api(tmp_path) -> None:
     inbox = conn.execute("SELECT correlation_id FROM capture_inbox").fetchone()
     assert post["capture_source"] == "manual_json"
     assert inbox["correlation_id"] == "manual-archive"
+
+
+def test_recorded_dom_capture_fixture_preserves_post_and_quote_media_boundary() -> None:
+    posts = load_fixture(FIXTURES / "dom_capture_posts.json")
+
+    assert len(posts) == 1
+    post = posts[0]
+    assert post.url == "https://x.com/example/status/1840000000000000300"
+    assert post.quoted_url == "https://x.com/analyst/status/1840000000000000200"
+    assert [media.media_scope for media in post.media] == ["post", "quote"]
+    assert post.media[0].source_url == "https://pbs.twimg.com/media/main-post.jpg"
+    assert post.media[1].source_url == "https://pbs.twimg.com/media/quote-context.jpg"
+    assert post.parse_quality["selector_version"] == "visible_dom_fixture_v2"
+    assert post.raw["authorization"] == "[redacted]"
+    assert post.raw["nested"]["csrf_token"] == "[redacted]"
+
+
+def test_recorded_dom_capture_fixture_persists_through_api_to_db(tmp_path) -> None:
+    import json
+
+    db_path = tmp_path / "dom_fixture.sqlite3"
+    client = TestClient(create_app(str(db_path)))
+    fixture = json.loads((FIXTURES / "dom_capture_posts.json").read_text(encoding="utf-8"))
+
+    response = client.post("/api/v1/captures", json=fixture["posts"][0])
+
+    assert response.status_code == 202
+    conn = init_db(db_path)
+    post = conn.execute("SELECT canonical_url, selector_version FROM captured_posts").fetchone()
+    media = conn.execute(
+        "SELECT source_url, alt_text FROM media_assets ORDER BY created_at, source_url"
+    ).fetchall()
+    assert post["canonical_url"] == "https://x.com/example/status/1840000000000000300"
+    assert post["selector_version"] == "visible_dom_fixture_v2"
+    assert len(media) == 2
+    assert all("profile_images" not in row["source_url"] for row in media)

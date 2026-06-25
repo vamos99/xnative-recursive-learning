@@ -133,7 +133,7 @@ def parse_extension_payload(payload: dict[str, Any]) -> CapturedPost:
         timestamp=str(payload.get("timestamp") or payload.get("post_time") or ""),
         quoted_text=str(payload.get("quoted_text") or ""),
         quoted_author=str(payload.get("quoted_author") or ""),
-        quoted_url=str(payload.get("quoted_url") or ""),
+        quoted_url=_redact_url(_safe_text(payload.get("quoted_url"))),
         visible_metrics=dict(payload.get("visible_metrics") or payload.get("metrics") or {}),
         media=media_items,
         parse_quality=parse_quality,

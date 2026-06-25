@@ -12,6 +12,7 @@ Code changes were allowed in this revision.
 - Added Phase 2 API route wiring for `/health`, `/ready`, `/api/v1/captures`, and temporary `/capture`.
 - Added capture payload size/validation handling.
 - Added capture parser hygiene: avatar/UI media filtering, credential-like raw-field redaction, query stripping, parse-quality propagation and manual archive fixture persistence.
+- Added recorded DOM capture payload fixture coverage for parser -> API -> DB persistence and post/quote media scope preservation.
 - Added extension local-storage capture outbox, retry backoff, bounded outbox, accepted-after-queue DOM marking and reduced permissions.
 - Added Phase 3 durable job state transitions, attempt tracking, lease recovery, retry/dead-letter handling and a normalize-capture worker runner.
 - Added Phase 3 runtime controls: generic job enqueue/dedupe, bounded backpressure, resource-class admission limits, priority aging, durable cursors, versioned cache invalidation, worker loop and handler savepoint rollback.
@@ -24,12 +25,12 @@ Code changes were allowed in this revision.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.
-- Added pytest test suite with 44 passing tests, including Phase 1 storage, Phase 2 API capture/parser/manual archive and Phase 3 job queue/runtime acceptance tests.
+- Added pytest test suite with 46 passing tests, including Phase 1 storage, Phase 2 API capture/parser/manual archive/recorded DOM payload and Phase 3 job queue/runtime acceptance tests.
 - Added Dockerfile, docker-compose.yml and `.env.example`.
 
 ## Validation
 
-`.venv/bin/pytest -q` -> 44 passed.
+`.venv/bin/pytest -q` -> 46 passed.
 `.venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py` -> passed.
 `.venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py` -> passed.
 `.venv/bin/mypy xnative` -> passed.
