@@ -24,6 +24,8 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
 - Browser extension permissions reduced and local outbox retry added for backend
   downtime. DOM posts are marked captured only after the background outbox accepts
   them.
+- Capture parsing now filters avatar/UI media, redacts credential-like raw fields,
+  carries parse-quality metadata and supports user-started manual archive import.
 - Durable job queue state transitions, lease recovery, retry/dead-letter handling
   and a normalize-capture worker runner were added.
 - Phase 3 worker runtime now includes generic job enqueue/dedupe, bounded
@@ -75,8 +77,9 @@ PYTHONPATH=. python -m xnative.sample_pipeline
 ```
 
 The current tests exercise helper functions, the fixture sample, Phase 1 storage
-contracts, Phase 2 API capture persistence, payload limits, validation and the
-Phase 3 job queue/worker runtime core, including dead-letter visibility/retry,
+contracts, Phase 2 API capture persistence, parser hygiene, payload limits,
+validation, manual archive import and the Phase 3 job queue/worker runtime core,
+including dead-letter visibility/retry,
 stage error taxonomy, token bucket admission and micro-batch execution.
 They do not yet prove the recorded DOM
 fixture -> API -> database -> review -> feedback workflow. See the traceability

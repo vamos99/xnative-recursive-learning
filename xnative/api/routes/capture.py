@@ -89,7 +89,11 @@ def _metrics(raw: dict[str, Any]) -> dict[str, int | None]:
     return normalized
 
 
-def domain_post_from_payload(payload: dict[str, Any]) -> CapturedPost:
+def domain_post_from_payload(
+    payload: dict[str, Any],
+    *,
+    capture_source: CaptureSource = CaptureSource.EXTENSION,
+) -> CapturedPost:
     parsed = parse_extension_payload(payload)
     quote = None
     if parsed.quoted_text:
@@ -118,8 +122,12 @@ def domain_post_from_payload(payload: dict[str, Any]) -> CapturedPost:
         media=media,
         visible_metrics=VisibleMetrics(**_metrics(parsed.visible_metrics)),
         platform_created_at=_parse_datetime(parsed.timestamp),
-        capture_source=CaptureSource.EXTENSION,
-        selector_version=str(payload.get("raw_capture_version") or "unknown"),
+        capture_source=capture_source,
+        selector_version=str(
+            parsed.parse_quality.get("selector_version")
+            or payload.get("raw_capture_version")
+            or "unknown"
+        ),
     )
 
 

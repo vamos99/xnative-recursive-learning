@@ -30,13 +30,15 @@
 
   function extractMedia(postEl) {
     const media = [];
-    postEl.querySelectorAll('img, video').forEach(el => {
+    postEl.querySelectorAll('[data-testid="tweetPhoto"] img, [data-testid="tweetPhoto"] video, [data-testid="videoPlayer"] video').forEach(el => {
       const url = el.currentSrc || el.src || '';
       if (!url || url.startsWith('data:')) return;
+      if (/profile_images|default_profile_images|emoji|avatar|badge|icon/i.test(url)) return;
       media.push({
         type: el.tagName.toLowerCase() === 'video' ? 'video' : 'image',
         url,
         alt_text: el.getAttribute('alt') || '',
+        media_scope: el.closest('div[role="link"]') ? 'quote' : 'post',
       });
     });
     return media;

@@ -10,6 +10,7 @@ class CapturedMedia:
     source_url: str = ""
     alt_text: str = ""
     local_path: str = ""
+    media_scope: str = "post"
 
 
 @dataclass
@@ -25,6 +26,7 @@ class CapturedPost:
     quoted_url: str = ""
     visible_metrics: dict[str, Any] = field(default_factory=dict)
     media: list[CapturedMedia] = field(default_factory=list)
+    parse_quality: dict[str, Any] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

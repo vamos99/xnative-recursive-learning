@@ -8,7 +8,7 @@ claims.
 
 - Phase 0: packaging, lockfile, cleanup, quality tools and evidence baseline.
 - Phase 1: domain contracts, SQLite migration, repository/UoW and storage tests.
-- Phase 2 partial: API capture route, readiness routes, bounded payload handling and extension outbox retry.
+- Phase 2 partial: API capture route, readiness routes, bounded payload handling, parser hygiene, manual archive fixture persistence and extension outbox retry.
 - Phase 3 partial: durable job state machine, retry/dead-letter, resource admission, priority aging, backpressure, cursor/cache, token bucket, micro-batch, worker loop, API job view and Streamlit dead-letter panel.
 - Baseline architecture, multimodal, performance, archive and provider policies.
 - Editable Mermaid, draw.io and Excalidraw planning diagrams.
@@ -16,6 +16,7 @@ claims.
 
 ## In progress
 
+- Phase 2 remaining: real Chrome recorded DOM fixture E2E and browser-level quote/main media boundary.
 - Phase 3 remaining: full domain pipeline stage chain beyond normalize.
 - P14 documentation remains continuously synchronized with implementation.
 
