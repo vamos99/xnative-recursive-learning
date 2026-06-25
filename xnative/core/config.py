@@ -27,6 +27,13 @@ class Settings:
     queue_aging_interval_seconds: int = int(os.getenv("XNATIVE_QUEUE_AGING_INTERVAL_SECONDS", "60"))
     queue_aging_max_boost: int = int(os.getenv("XNATIVE_QUEUE_AGING_MAX_BOOST", "50"))
     worker_idle_sleep_seconds: float = float(os.getenv("XNATIVE_WORKER_IDLE_SLEEP_SECONDS", "1"))
+    worker_batch_size: int = int(os.getenv("XNATIVE_WORKER_BATCH_SIZE", "4"))
+    worker_token_bucket_capacity: float = float(
+        os.getenv("XNATIVE_WORKER_TOKEN_BUCKET_CAPACITY", "60")
+    )
+    worker_token_bucket_refill_per_second: float = float(
+        os.getenv("XNATIVE_WORKER_TOKEN_BUCKET_REFILL_PER_SECOND", "10")
+    )
     retry_max_attempts: int = int(os.getenv("XNATIVE_RETRY_MAX_ATTEMPTS", "5"))
     risk_review_threshold: float = float(os.getenv("XNATIVE_RISK_REVIEW_THRESHOLD", "0.60"))
     heavy_escalation_confidence: float = float(

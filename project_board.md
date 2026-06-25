@@ -9,14 +9,14 @@ claims.
 - Phase 0: packaging, lockfile, cleanup, quality tools and evidence baseline.
 - Phase 1: domain contracts, SQLite migration, repository/UoW and storage tests.
 - Phase 2 partial: API capture route, readiness routes, bounded payload handling and extension outbox retry.
-- Phase 3 partial: durable job state machine, retry/dead-letter, resource admission, priority aging, backpressure, cursor/cache, worker loop, API job view and Streamlit dead-letter panel.
+- Phase 3 partial: durable job state machine, retry/dead-letter, resource admission, priority aging, backpressure, cursor/cache, token bucket, micro-batch, worker loop, API job view and Streamlit dead-letter panel.
 - Baseline architecture, multimodal, performance, archive and provider policies.
 - Editable Mermaid, draw.io and Excalidraw planning diagrams.
 - Current master DOCX/PDF planning documents and visual QA.
 
 ## In progress
 
-- Phase 3 remaining: full pipeline stage chain, stage timeout taxonomy and token-bucket/micro-batch detail.
+- Phase 3 remaining: full domain pipeline stage chain beyond normalize.
 - P14 documentation remains continuously synchronized with implementation.
 
 ## Next - Phase 4 plus Phase 2 gaps

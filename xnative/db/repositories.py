@@ -100,6 +100,10 @@ class UnitOfWork(AbstractContextManager["UnitOfWork"]):
     def cache(self) -> CacheRepository:
         return CacheRepository(self.connection)
 
+    @property
+    def rate_limits(self) -> RateLimitRepository:
+        return RateLimitRepository(self.connection)
+
 
 class CaptureRepository:
     def __init__(self, conn: sqlite3.Connection):
@@ -398,6 +402,28 @@ class JobRepository:
             lease_owner=str(claimed["lease_owner"]),
             lease_expires_at=int(claimed["lease_expires_at"]),
         )
+
+    def claim_batch(
+        self,
+        owner: str,
+        resource_class: ResourceClass = ResourceClass.LIGHT,
+        *,
+        limit: int,
+        lease_seconds: int = 60,
+        max_running: int | None = None,
+    ) -> list[ClaimedJob]:
+        claimed: list[ClaimedJob] = []
+        for index in range(max(0, limit)):
+            job = self.claim_next(
+                owner=f"{owner}-{index + 1}",
+                resource_class=resource_class,
+                lease_seconds=lease_seconds,
+                max_running=max_running,
+            )
+            if job is None:
+                break
+            claimed.append(job)
+        return claimed
 
     def _queued_count(self, resource_class: ResourceClass) -> int:
         row = self.conn.execute(
@@ -831,6 +857,65 @@ class CacheRepository:
             """,
             (now, now, namespace, version),
         ).rowcount
+
+
+class RateLimitRepository:
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+
+    def try_acquire(
+        self,
+        name: str,
+        *,
+        capacity: float,
+        refill_per_second: float,
+        cost: float = 1.0,
+    ) -> bool:
+        if capacity <= 0 or refill_per_second < 0 or cost <= 0:
+            raise ValueError("Token bucket capacity/refill/cost must be positive")
+        now = utc_us()
+        row = self.conn.execute(
+            "SELECT * FROM rate_limit_buckets WHERE name=?",
+            (name,),
+        ).fetchone()
+        if row is None:
+            if cost > capacity:
+                return False
+            self.conn.execute(
+                """
+                INSERT INTO rate_limit_buckets(
+                  name, capacity, refill_per_second, tokens, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (name, capacity, refill_per_second, capacity - cost, now),
+            )
+            return True
+
+        elapsed_seconds = max(0.0, (now - int(row["updated_at"])) / 1_000_000)
+        tokens = min(
+            capacity,
+            float(row["tokens"]) + elapsed_seconds * refill_per_second,
+        )
+        if tokens < cost:
+            self.conn.execute(
+                """
+                UPDATE rate_limit_buckets
+                SET capacity=?, refill_per_second=?, tokens=?, updated_at=?
+                WHERE name=?
+                """,
+                (capacity, refill_per_second, tokens, now, name),
+            )
+            return False
+        self.conn.execute(
+            """
+            UPDATE rate_limit_buckets
+            SET capacity=?, refill_per_second=?, tokens=?, updated_at=?
+            WHERE name=?
+            """,
+            (capacity, refill_per_second, tokens - cost, now, name),
+        )
+        return True
 
 
 def rows(

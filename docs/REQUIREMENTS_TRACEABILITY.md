@@ -20,7 +20,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | Farkli taslaklar | P9 | Ayni 3 sabit taslak | Diversity/style tests |
 | Feedback learning | P10 | DB helper var, pipeline disi | Feedback -> model -> score E2E |
 | Gercek review UI | P11 | Bos Streamlit dosyasi | UI E2E ve screenshot QA |
-| Worker/retry | P3, P12 | Durable job tablosu, capture enqueue, generic enqueue/dedupe, tekil claim, lease recovery, savepoint rollback, retry, backpressure, resource admission, priority aging, cursor/cache, worker loop, API job gorunumu ve Streamlit dead-letter panel temeli var | `tests/integration/test_phase3_jobs.py` + restart/runtime UI smoke testi |
+| Worker/retry | P3, P12 | Durable job tablosu, capture enqueue, generic enqueue/dedupe, tekil claim, lease recovery, savepoint rollback, retry, backpressure, resource admission, priority aging, cursor/cache, token bucket, micro-batch, worker loop, API job gorunumu ve Streamlit dead-letter panel temeli var | `tests/integration/test_phase3_jobs.py` + restart/runtime UI smoke testi |
 | Arsiv/retention | P4 | Yok | Quota/GC/deletion tests |
 | Docker acceptance | P13 | Config parse olur; runtime kaniti yok | Health/readiness compose test |
 | Dokuman dogrulugu | P14 | Uygulama dokumanlari v1.0 final; kod kanitlari fazlarla eklenecek | Kod-test-doc cross-check + generated DOCX/PDF QA |
@@ -30,7 +30,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | CLIP tabanli gorsel-metin kaniti | P5-012 | Karar ve benchmark kapisi var; adapter yok | Turkce zero-shot/retrieval golden set + CPU/GPU/RAM profili |
 | Typed graph/HIN ve GNN | P6-008, P6-010 | Sema karari var; graph omurgasi yok | Metapath/PPR baseline + GNN challenger time-split ablation |
 | Yerel vector index | P6-009 | TF-IDF var; dense index yok | Exact recall ground-truth + FAISS latency/RAM benchmarki |
-| Veri hatti algoritmalari | P3-007 | Bounded backpressure, priority aging, resource-class admission ve full-jitter retry temeli var; token-bucket, micro-batch ve soak profili yok | Retry storm, queue starvation, restart ve memory-pressure testleri |
+| Veri hatti algoritmalari | P3-007 | Bounded backpressure, priority aging, resource-class admission, durable token bucket, micro-batch ve full-jitter retry temeli var; soak profili yok | Retry storm, queue starvation, restart ve memory-pressure testleri |
 
 ## Kanit standardi
 

@@ -47,7 +47,7 @@ Tarih: 2026-06-22
 | `P3-JOB-003` | P3-007 | Backfill + live capture | Live iş starvation olmadan önce |
 | `P3-JOB-004` | P3-007 | Memory pressure | Heavy admission durur, API canlı |
 
-2026-06-25 kismi kod kaniti: `tests/integration/test_phase3_jobs.py`, `P3-JOB-001` ve `P3-JOB-002` icin lease recovery, completed job, retry, savepoint rollback, dead-letter listesi ve replay davranisini dogrular. `P3-JOB-003` ve `P3-JOB-004` icin live is sirasi, priority aging ve resource-class admission testleri eklendi. `GET /api/v1/jobs`, `POST /api/v1/jobs/{id}/retry` ve Streamlit queue/dead-letter helper'i otomatik test edilir. Bu kanit tam pipeline stage zinciri, stage timeout sinifi ve token-bucket/micro-batch ayrintisini henuz kapsamaz.
+2026-06-25 kismi kod kaniti: `tests/integration/test_phase3_jobs.py`, `P3-JOB-001` ve `P3-JOB-002` icin lease recovery, completed job, retry, savepoint rollback, dead-letter listesi ve replay davranisini dogrular. `P3-JOB-003` ve `P3-JOB-004` icin live is sirasi, priority aging ve resource-class admission testleri eklendi. `GET /api/v1/jobs`, `POST /api/v1/jobs/{id}/retry`, Streamlit queue/dead-letter helper'i, durable token bucket bloklama, stage timeout/fatal hata ayrimi ve bounded micro-batch otomatik test edilir. Bu kanit tam domain pipeline stage zincirini henuz kapsamaz.
 | `P4-MED-001` | P4-001..002 | Aynı byte ve resize/crop fixture | SHA exact; pHash near-duplicate ayrımı |
 | `P4-MED-002` | P4-005 | Aynı blob iki post | Tek dosya, iki referans |
 | `P4-MED-003` | P4-004..006 | Kota ve silinmiş URL | Policy ile GC; metadata/audit kalır |

@@ -6,11 +6,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from xnative.api.main import create_app
+from xnative.core.errors import FatalJobError, StageTimeoutError
 from xnative.db.database import init_db
 from xnative.db.repositories import UnitOfWork
 from xnative.domain import CapturedPost, CaptureSource, ResourceClass, utc_us
 from xnative.ui.streamlit_app import load_queue_dashboard, replay_dead_letter
-from xnative.worker.scheduler import run_due_job_once, run_worker_loop
+from xnative.worker.scheduler import run_due_job_batch, run_due_job_once, run_worker_loop
 
 
 def make_post(post_id: str = "1840000000000000200") -> CapturedPost:
@@ -394,3 +395,92 @@ def test_jobs_api_exposes_dead_letters_and_accepts_retry(tmp_path) -> None:
 
     missing_response = client.post("/api/v1/jobs/not-a-real-job/retry")
     assert missing_response.status_code == 404
+
+
+def test_token_bucket_blocks_claim_without_losing_pending_job(tmp_path) -> None:
+    db_path = tmp_path / "jobs.sqlite3"
+    bucket_name = "worker:test"
+    with UnitOfWork(db_path) as uow:
+        result = uow.captures.persist_capture(make_post("1840000000000000207"))
+        assert not uow.rate_limits.try_acquire(
+            bucket_name,
+            capacity=1,
+            refill_per_second=0,
+            cost=2,
+        )
+        uow.connection.execute(
+            """
+            INSERT INTO rate_limit_buckets(
+              name, capacity, refill_per_second, tokens, updated_at
+            )
+            VALUES (?, 60, 10, 0, ?)
+            ON CONFLICT(name) DO UPDATE SET tokens=0, updated_at=excluded.updated_at
+            """,
+            (bucket_name, utc_us() + 60_000_000),
+        )
+
+    assert not run_due_job_once(str(db_path), token_bucket=bucket_name)
+    conn = init_db(db_path)
+    row = conn.execute("SELECT status FROM jobs WHERE id=?", (result.job_id,)).fetchone()
+    assert row["status"] == "pending"
+
+    conn.execute(
+        "UPDATE rate_limit_buckets SET tokens=1, updated_at=? WHERE name=?",
+        (utc_us() + 60_000_000, bucket_name),
+    )
+    conn.commit()
+    assert run_due_job_once(str(db_path), token_bucket=bucket_name)
+
+
+def test_job_error_taxonomy_separates_timeout_and_fatal_failures(tmp_path) -> None:
+    db_path = tmp_path / "jobs.sqlite3"
+    with UnitOfWork(db_path) as uow:
+        timeout = uow.jobs.enqueue_job(
+            job_type="timeout_stage",
+            payload_ref="payload-timeout",
+            dedupe_key="timeout_stage:payload-timeout:v1",
+        )
+        fatal = uow.jobs.enqueue_job(
+            job_type="fatal_stage",
+            payload_ref="payload-fatal",
+            dedupe_key="fatal_stage:payload-fatal:v1",
+        )
+
+    def timeout_handler(job, uow: UnitOfWork) -> None:
+        raise StageTimeoutError("stage exceeded configured timeout")
+
+    def fatal_handler(job, uow: UnitOfWork) -> None:
+        raise FatalJobError("invalid immutable payload")
+
+    assert run_due_job_once(str(db_path), handlers={"timeout_stage": timeout_handler})
+    assert run_due_job_once(str(db_path), handlers={"fatal_stage": fatal_handler})
+
+    conn = init_db(db_path)
+    timeout_row = conn.execute(
+        "SELECT status, last_error_code FROM jobs WHERE id=?",
+        (timeout.job_id,),
+    ).fetchone()
+    fatal_row = conn.execute(
+        "SELECT status, last_error_code FROM jobs WHERE id=?",
+        (fatal.job_id,),
+    ).fetchone()
+    assert timeout_row["status"] == "retry"
+    assert timeout_row["last_error_code"] == "STAGE_TIMEOUT"
+    assert fatal_row["status"] == "dead"
+    assert fatal_row["last_error_code"] == "FatalJobError"
+
+
+def test_due_job_batch_processes_bounded_micro_batch(tmp_path) -> None:
+    db_path = tmp_path / "jobs.sqlite3"
+    with UnitOfWork(db_path) as uow:
+        for suffix in range(3):
+            uow.captures.persist_capture(make_post(f"184000000000000021{suffix}"))
+
+    processed = run_due_job_batch(str(db_path), batch_size=2)
+
+    conn = init_db(db_path)
+    completed = conn.execute("SELECT COUNT(*) c FROM jobs WHERE status='completed'").fetchone()["c"]
+    pending = conn.execute("SELECT COUNT(*) c FROM jobs WHERE status='pending'").fetchone()["c"]
+    assert processed == 2
+    assert completed == 2
+    assert pending == 1

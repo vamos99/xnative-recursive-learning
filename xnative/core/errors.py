@@ -12,3 +12,15 @@ class ValidationError(XNativeError):
 
 class ModelUnavailable(XNativeError):
     pass
+
+
+class RetryableJobError(XNativeError):
+    pass
+
+
+class FatalJobError(XNativeError):
+    pass
+
+
+class StageTimeoutError(RetryableJobError):
+    pass
