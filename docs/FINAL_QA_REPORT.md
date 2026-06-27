@@ -14,15 +14,15 @@ Status: Not release-ready
 
 ## Release blockers
 
-- The extension/API route and localhost outbox issues have Phase 2 code coverage, but recorded DOM fixture E2E is still missing.
+- The extension/API route and localhost outbox issues have Phase 2 code coverage, including recorded DOM fixture, browser content-script fixture and background -> API -> DB fixture QA.
 - The Streamlit file defines `run_app()` but never calls it; the required review workflow does not exist.
 - The sample pipeline does not persist posts, events, media or suggestions and does not use learned weights.
 - All ten fixture posts receive the same three template texts.
-- The current `phash` is a truncated SHA-256, not perceptual image hashing.
+- Exact SHA-256 and `dhash64-v1` perceptual image hashing are now separated, but full media lifecycle/refcount/quota/GC is still missing.
 - OCR, media storage, style retrieval, novelty, bandit and learning helpers are disconnected from the main pipeline.
 - The worker now has a durable/retryable Phase 3 core and queue/dead-letter operations panel, but the full pipeline stage chain is still missing.
 - Docker runtime health was not verified because the local Docker daemon was unavailable.
-- Tests do not cover recorded DOM fixture integration, OCR/pHash, UI, Docker health or end-to-end learning.
+- Tests now cover recorded DOM fixture integration and Phase 4 media hashing basics; they still do not cover OCR integration, UI, Docker health or end-to-end learning.
 
 ## Binding next work
 

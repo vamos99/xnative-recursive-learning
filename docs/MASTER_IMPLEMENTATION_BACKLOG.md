@@ -93,8 +93,8 @@ Faz 3 kismi kanit: 2026-06-25 kosusunda `xnative/db/repositories.py` generic job
 
 Bagimlilik: Faz 1 ve 3.
 
-1. `P4-001` `DUZELT` SHA kisaltmasini “pHash” diye adlandirmayi birak; SHA-256 exact dedup ve gercek perceptual hash'i ayir.
-2. `P4-002` `EKLE` dHash/pHash, Hamming threshold ve thumbnail tabanli benzer medya cluster testi.
+1. `P4-001` `DUZELT` SHA kisaltmasini “pHash” diye adlandirmayi birak; SHA-256 exact dedup ve gercek perceptual hash'i ayir. Durum: `TAMAM`.
+2. `P4-002` `EKLE` dHash/pHash, Hamming threshold ve thumbnail tabanli benzer medya cluster testi. Durum: `DEVAM`.
 3. `P4-003` `EKLE` varsayilan metadata-only arsiv: X URL, gorunur metin, alt text, metrik snapshot ve provenance.
 4. `P4-004` `EKLE` opsiyonel yerel thumbnail/orijinal medya politikalari; telif/izin ve disk kotasi.
 5. `P4-005` `EKLE` content-addressed media store, referans sayimi, TTL, LRU ve garbage collection.
@@ -102,6 +102,8 @@ Bagimlilik: Faz 1 ve 3.
 7. `P4-007` `EKLE` video icin sinirli frame sampling, audio extraction ve duration limiti.
 
 Kabul kapisi: Benzer gorseller cluster olur; ayni dosya tek kez saklanir; kota asiminda kontrollu temizlik yapilir; silinen X linki kaydin geri kalanini bozmaz.
+
+Faz 4 kismi kanit: 2026-06-27 kosusunda `xnative/media/phash.py` eski SHA-256 prefix davranisindan ayrildi. `exact_sha256_file()` tam SHA-256 digest'i exact byte-level dedup icin, `difference_hash_file()` ise `dhash64-v1:<hex>` formatinda gercek perceptual hash icin kullanilir. `media_hashes_file()` ve `store_local_media()` exact/perceptual hash alanlarini ayri dondurur; backward-compatible `phash` alani perceptual hash'e esitlenir. `tests/unit/test_media_hashing.py` ayni byte fixture'da SHA esitligini, kucuk gorsel degisiklikte exact SHA farkli ama dHash Hamming mesafesi yakin davranisini, farkli gorselde uzak davranisini ve kucuk batch cluster sonucunu dogrular. Kalan P4 isleri: content-addressed store/refcount, kota/TTL/LRU GC, deleted URL snapshot ve video frame/audio lifecycle.
 
 ### Faz 5 - Multimodal icerik anlama
 

@@ -51,6 +51,8 @@ Tarih: 2026-06-22
 | `P4-MED-001` | P4-001..002 | Aynı byte ve resize/crop fixture | SHA exact; pHash near-duplicate ayrımı |
 | `P4-MED-002` | P4-005 | Aynı blob iki post | Tek dosya, iki referans |
 | `P4-MED-003` | P4-004..006 | Kota ve silinmiş URL | Policy ile GC; metadata/audit kalır |
+
+2026-06-27 kismi kod kaniti: `tests/unit/test_media_hashing.py`, `P4-MED-001` icin tam SHA-256 exact dedup ile `dhash64-v1` perceptual hash ayrimini dogrular. Ayni byte fixture exact/perceptual hash esitligini korur; kucuk gorsel degisikligi exact SHA'yi degistirirken Hamming threshold icinde near-duplicate kalir; farkli gorsel threshold disinda kalir; kucuk batch cluster sonucu `[[0, 1], [2]]` olarak dogrulanir. Bu kanit P4-005 content-addressed store/refcount veya P4-004..006 kota/GC lifecycle davranisini henuz kapsamaz.
 | `P5-MM-001` | P5-001..008 | Futbol kelimesi yok, görsel futbol | Belirsiz değilse topic evidence üretir |
 | `P5-MM-002` | P5-006 | Alakalı text + alakasız media | Contradiction/intent hypotheses; spam kesinliği yok |
 | `P5-MM-003` | P5-008 | Media eksik | Missing flag; relevance sıfırlanmaz |

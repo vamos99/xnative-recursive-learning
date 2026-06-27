@@ -10,7 +10,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | API key olmadan sample | P0-004, P3 | Kismen calisiyor | Temiz kurulum acceptance |
 | Yerel SQLite | P1 | Phase 1 veri omurgasi tamam: checksum migration, WAL/PRAGMA, repository/UoW ve FK testleri var | `tests/integration/test_phase1_storage.py` + P1-DB-001..005 |
 | Dedup | P1, P3, P4 | Capture idempotency DB seviyesinde tamam; ingestion/media dedup sonraki fazlarda | Idempotency integration + P3/P4 pipeline testleri |
-| Gercek pHash | P4-001..002 | Yok; SHA kisaltmasi var | Similar-image fixture |
+| Gercek perceptual hash | P4-001..002 | P4-001 tamam: exact SHA-256 ile `dhash64-v1` perceptual hash ayrildi; kucuk batch Hamming cluster testi var. P4-002 lifecycle ve buyuk olcek bucket/LSH henuz eksik | `tests/unit/test_media_hashing.py` |
 | OCR fallback | P5-002 | Fonksiyon iskeleti, pipeline disi | Mock + gercek opsiyonel test |
 | Quote context | P5, P6 | Basit text concat | Retrieval/event integration |
 | Multimodal anlama | P5 | Yok | Golden multimodal set |

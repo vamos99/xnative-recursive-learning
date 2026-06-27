@@ -23,11 +23,11 @@ Code changes were allowed in this revision.
 - Added browser-visible capture parser and extension improvements.
 - Added fixture/manual import flow.
 - Added text cleaning, AI/news phrase filtering, quality filtering and style memory.
-- Added media risk, OCR fallback and pHash-style hashing utilities.
+- Added media risk, OCR fallback, exact SHA-256 media hashing and dHash64 perceptual hashing utilities.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.
-- Added pytest test suite with 46 passing tests, including Phase 1 storage, Phase 2 API capture/parser/manual archive/recorded DOM payload and Phase 3 job queue/runtime acceptance tests.
+- Added pytest test suite with 49 passing tests, including Phase 1 storage, Phase 2 API capture/parser/manual archive/recorded DOM payload, Phase 3 job queue/runtime and Phase 4 media hash acceptance tests.
 - Added Dockerfile, docker-compose.yml and `.env.example`.
 
 ## Validation

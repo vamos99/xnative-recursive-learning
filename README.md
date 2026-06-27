@@ -42,7 +42,7 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
   retry through `POST /api/v1/jobs/{id}/retry`, and a Streamlit operations panel.
 - Browser extension capture contract improved.
 - Manual fixture import and sample mode added.
-- Text, quote, media alt text, OCR fallback, pHash-style hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
+- Text, quote, media alt text, OCR fallback, exact SHA-256 media hashing, dHash64 perceptual hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
 - Pytest coverage added for the local MVP.
 - Docker and Docker Compose added.
 
@@ -133,7 +133,7 @@ It does not collect cookies, passwords, 2FA, hidden data, or credentials. It doe
 - `xnative/capture` - visible DOM/manual fixture parsing.
 - `xnative/domain` - Pydantic domain contracts and enums.
 - `xnative/ingestion` - normalization, deduplication, event building.
-- `xnative/media` - media metadata, optional OCR fallback, hashing, risk.
+- `xnative/media` - media metadata, optional OCR fallback, exact/perceptual hashing, risk.
 - `xnative/nlp` - text cleaning, language fallback, style memory, quality filters.
 - `xnative/scoring` - event, candidate, risk, novelty/fatigue, final decision scores.
 - `xnative/generation` - template fallback suggestions and optional LLM adapter.
