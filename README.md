@@ -28,6 +28,8 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
   carries parse-quality metadata and supports user-started manual archive import.
 - A recorded DOM capture payload fixture now verifies parser -> API -> DB
   behavior and post/quote media scope preservation.
+- A Playwright browser QA script runs the content script against a recorded DOM
+  fixture and verifies the captured payload before background delivery.
 - Durable job queue state transitions, lease recovery, retry/dead-letter handling
   and a normalize-capture worker runner were added.
 - Phase 3 worker runtime now includes generic job enqueue/dedupe, bounded
@@ -81,7 +83,7 @@ PYTHONPATH=. python -m xnative.sample_pipeline
 The current tests exercise helper functions, the fixture sample, Phase 1 storage
 contracts, Phase 2 API capture persistence, parser hygiene, payload limits,
 validation, manual archive import, recorded DOM payload fixture flow and the
-Phase 3 job queue/worker runtime core,
+browser content-script fixture flow and the Phase 3 job queue/worker runtime core,
 including dead-letter visibility/retry,
 stage error taxonomy, token bucket admission and micro-batch execution.
 They do not yet prove the recorded DOM

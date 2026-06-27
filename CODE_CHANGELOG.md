@@ -13,6 +13,7 @@ Code changes were allowed in this revision.
 - Added capture payload size/validation handling.
 - Added capture parser hygiene: avatar/UI media filtering, credential-like raw-field redaction, query stripping, parse-quality propagation and manual archive fixture persistence.
 - Added recorded DOM capture payload fixture coverage for parser -> API -> DB persistence and post/quote media scope preservation.
+- Added Playwright CLI browser QA script for content-script DOM fixture capture behavior.
 - Added extension local-storage capture outbox, retry backoff, bounded outbox, accepted-after-queue DOM marking and reduced permissions.
 - Added Phase 3 durable job state transitions, attempt tracking, lease recovery, retry/dead-letter handling and a normalize-capture worker runner.
 - Added Phase 3 runtime controls: generic job enqueue/dedupe, bounded backpressure, resource-class admission limits, priority aging, durable cursors, versioned cache invalidation, worker loop and handler savepoint rollback.

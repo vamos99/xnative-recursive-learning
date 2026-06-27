@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>XNative content script fixture</title>
+    <script>
+      window.__xnativeMessages = [];
+      window.chrome = {
+        runtime: {
+          lastError: null,
+          sendMessage(message, sendResponse) {
+            window.__xnativeMessages.push(message);
+            sendResponse({ accepted: true });
+          },
+        },
+      };
+    </script>
+  </head>
+  <body>
+    <main>
+      <article role="article" data-testid="tweet">
+        <div data-testid="User-Name">
+          Example
+          <a href="/example"><span>@Example</span></a>
+          <img src="https://pbs.twimg.com/profile_images/avatar.jpg" alt="profile avatar" />
+        </div>
+        <a href="https://x.com/example/status/1840000000000000400?s=20">
+          <time datetime="2026-06-25T10:00:00Z">10:00</time>
+        </a>
+        <div data-testid="tweetText" lang="tr">Kanat değişimi sonrası pres tetikleniyor.</div>
+        <div data-testid="tweetPhoto">
+          <img
+            src="https://pbs.twimg.com/media/main-post.jpg?format=jpg&name=small"
+            alt="Futbol sahasında pres anı"
+          />
+        </div>
+        <div role="link" aria-label="quoted post">
+          <a href="/analyst"><span>@Analyst</span></a>
+          <a href="https://x.com/analyst/status/1840000000000000200?ref=quote">
+            <time datetime="2026-06-25T09:45:00Z">09:45</time>
+          </a>
+          <p>Rakip bek çizgiye basınca merkez boşalıyor.</p>
+          <div data-testid="tweetPhoto">
+            <img
+              src="https://pbs.twimg.com/media/quote-context.jpg?format=jpg&name=small"
+              alt="Quote içindeki taktik ekran görüntüsü"
+            />
+          </div>
+        </div>
+        <div aria-label="12 likes">12</div>
+        <div aria-label="3 reposts">3</div>
+        <div aria-label="1,204 views">1,204</div>
+      </article>
+    </main>
+    <script src="../../extension/content.js"></script>
+  </body>
+</html>
