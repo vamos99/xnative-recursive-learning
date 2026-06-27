@@ -15,7 +15,7 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-46 passed in 0.67s
+46 passed in 0.54s
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
@@ -40,6 +40,10 @@ exit 0
 
 scripts/qa/content_script_browser_check.sh
 content-script browser fixture ok
+
+scripts/qa/background_api_db_check.sh
+background delivery accepted
+background -> API -> DB fixture ok
 ```
 
 ## Belge QA
@@ -66,7 +70,7 @@ content-script browser fixture ok
 - Extension outbox ve izinler: `extension/background.js`, `extension/manifest.json`.
 - Extension content capture davranisi: `extension/content.js`.
 - Acceptance testleri: `tests/integration/test_phase2_api_capture.py`.
-- Kanitlanan kapilar: `/health`, `/ready`, `POST /api/v1/captures`, gecici `/capture` alias, DB persistence, idempotent duplicate response, 413 payload limiti, 422 validation, parser query temizleme, credential-like raw-field redaction, avatar/UI media filtreleme, parse-quality selector propagation, manual archive fixture persistence, recorded DOM payload fixture persistence, post/quote media scope preservation, browser content-script fixture capture, extension JS syntax ve manifest JSON parse.
+- Kanitlanan kapilar: `/health`, `/ready`, `POST /api/v1/captures`, gecici `/capture` alias, DB persistence, idempotent duplicate response, 413 payload limiti, 422 validation, parser query temizleme, credential-like raw-field redaction, avatar/UI media filtreleme, parse-quality selector propagation, manual archive fixture persistence, recorded DOM payload fixture persistence, post/quote media scope preservation, browser content-script fixture capture, background -> API -> DB fixture delivery, extension JS syntax ve manifest JSON parse.
 
 ## Faz 3 kismi kod kaniti
 
@@ -80,6 +84,6 @@ content-script browser fixture ok
 
 ## Sinirlar
 
-- Bu baseline mevcut 46 testin ve content-script browser fixture check'in gectigini kanitlar; packaged extension background -> API -> DB -> review -> feedback akisini kanitlamaz.
+- Bu baseline mevcut 46 testin, content-script browser fixture check'in ve background -> API -> DB fixture check'in gectigini kanitlar; canli X selector drift, review ve feedback akisini kanitlamaz.
 - Docker Compose konfigurasyonu parse edildi; yerel Docker daemon calismadigi icin runtime health acceptance yapilmadi.
 - Multimodal model kalitesi ve performans SLO'lari henuz benchmark edilmedi.

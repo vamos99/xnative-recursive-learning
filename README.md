@@ -30,6 +30,8 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
   behavior and post/quote media scope preservation.
 - A Playwright browser QA script runs the content script against a recorded DOM
   fixture and verifies the captured payload before background delivery.
+- A background-service-worker QA script delivers that payload to the local API
+  and verifies SQLite persistence without X API or credentials.
 - Durable job queue state transitions, lease recovery, retry/dead-letter handling
   and a normalize-capture worker runner were added.
 - Phase 3 worker runtime now includes generic job enqueue/dedupe, bounded
@@ -89,6 +91,13 @@ stage error taxonomy, token bucket admission and micro-batch execution.
 They do not yet prove the recorded DOM
 fixture -> API -> database -> review -> feedback workflow. See the traceability
 matrix for the missing acceptance coverage.
+
+Optional browser QA:
+
+```bash
+scripts/qa/content_script_browser_check.sh
+scripts/qa/background_api_db_check.sh
+```
 
 ## Docker
 

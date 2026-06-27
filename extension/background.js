@@ -1,5 +1,5 @@
 // Background service worker. It forwards visible-page captures to localhost only.
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = globalThis.XNATIVE_BACKEND_URL || 'http://localhost:8000';
 const OUTBOX_KEY = 'xnativeCaptureOutbox';
 const RETRY_ALARM = 'xnativeRetryOutbox';
 const MAX_BACKOFF_MS = 5 * 60 * 1000;
