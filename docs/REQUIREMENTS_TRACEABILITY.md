@@ -10,7 +10,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | API key olmadan sample | P0-004, P3 | Kismen calisiyor | Temiz kurulum acceptance |
 | Yerel SQLite | P1 | Phase 1 veri omurgasi tamam: checksum migration, WAL/PRAGMA, repository/UoW ve FK testleri var | `tests/integration/test_phase1_storage.py` + P1-DB-001..005 |
 | Dedup | P1, P3, P4 | Capture idempotency DB seviyesinde tamam; ingestion/media dedup sonraki fazlarda | Idempotency integration + P3/P4 pipeline testleri |
-| Gercek perceptual hash | P4-001..002 | P4-001 tamam: exact SHA-256 ile `dhash64-v1` perceptual hash ayrildi; kucuk batch Hamming cluster testi var. P4-002 lifecycle ve buyuk olcek bucket/LSH henuz eksik | `tests/unit/test_media_hashing.py` |
+| Gercek perceptual hash | P4-001..002 | P4-001 tamam: exact SHA-256 ile `dhash64-v1` perceptual hash ayrildi; kucuk batch Hamming cluster testi var. Buyuk olcek bucket/LSH henuz eksik | `tests/unit/test_media_hashing.py` |
 | OCR fallback | P5-002 | Fonksiyon iskeleti, pipeline disi | Mock + gercek opsiyonel test |
 | Quote context | P5, P6 | Basit text concat | Retrieval/event integration |
 | Multimodal anlama | P5 | Yok | Golden multimodal set |
@@ -21,7 +21,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | Feedback learning | P10 | DB helper var, pipeline disi | Feedback -> model -> score E2E |
 | Gercek review UI | P11 | Bos Streamlit dosyasi | UI E2E ve screenshot QA |
 | Worker/retry | P3, P12 | Durable job tablosu, capture enqueue, generic enqueue/dedupe, tekil claim, lease recovery, savepoint rollback, retry, backpressure, resource admission, priority aging, cursor/cache, token bucket, micro-batch, worker loop, API job gorunumu ve Streamlit dead-letter panel temeli var | `tests/integration/test_phase3_jobs.py` + restart/runtime UI smoke testi |
-| Arsiv/retention | P4 | Yok | Quota/GC/deletion tests |
+| Arsiv/retention | P4 | Kismi: content-addressed local media store, manifest refcount, duplicate blob engelleme ve referanssiz dosya GC testi var; explicit retention/TTL, deleted URL snapshot ve audit henuz eksik | `tests/unit/test_media_hashing.py` |
 | Docker acceptance | P13 | Config parse olur; runtime kaniti yok | Health/readiness compose test |
 | Dokuman dogrulugu | P14 | Uygulama dokumanlari v1.0 final; kod kanitlari fazlarla eklenecek | Kod-test-doc cross-check + generated DOCX/PDF QA |
 | Hedef donanimda surekli calisma | P5-009, P12 | Tasarim guncellendi; benchmark yok | 8 GB/i5/GTX 1050 soak ve OOM testi |

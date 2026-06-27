@@ -15,13 +15,13 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-49 passed in 0.64s
+50 passed in 0.58s
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
 
 .venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py
-80 files already formatted
+81 files already formatted
 
 .venv/bin/mypy xnative
 Success: no issues found in 74 source files
@@ -46,7 +46,7 @@ background delivery accepted
 background -> API -> DB fixture ok
 
 .venv/bin/pytest -q tests/unit/test_media_hashing.py
-3 passed in 0.04s
+4 passed in 0.08s
 ```
 
 ## Belge QA
@@ -81,20 +81,20 @@ background -> API -> DB fixture ok
 - Worker runtime migration: `xnative/db/migrations/0002_worker_runtime.sql`.
 - Worker rate-limit migration: `xnative/db/migrations/0003_worker_rate_limits.sql`.
 - Worker runner ve handler: `xnative/worker/scheduler.py`, `xnative/worker/jobs.py`.
+- Queue/dead-letter API ve UI: `xnative/api/routes/jobs.py`, `xnative/ui/streamlit_app.py`.
+- Acceptance testleri: `tests/integration/test_phase3_jobs.py`.
+- Kanitlanan kapilar: completed job, attempt kaydi, expired lease recovery, retryable failure, max attempt sonrasi dead-letter, unknown job type dead-letter, generic enqueue/dedupe, bounded backpressure, priority aging, resource admission, durable cursor, versioned cache invalidation, durable token bucket, bounded micro-batch, bounded worker loop, stage timeout/fatal hata ayrimi, handler hata rollback, dead-letter listeleme, replay audit, API job gorunumu ve Streamlit helper.
 
 ## Faz 4 kismi kod kaniti
 
 - Exact media hash: `xnative/media/phash.py::exact_sha256_file`.
 - Perceptual media hash: `xnative/media/phash.py::difference_hash_file` (`dhash64-v1`).
-- Local media store hash output: `xnative/media/media_store.py`.
+- Local media store: `xnative/media/media_store.py`.
 - Acceptance testleri: `tests/unit/test_media_hashing.py`.
-- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi ve kucuk batch cluster davranisi.
-- Queue/dead-letter API ve UI: `xnative/api/routes/jobs.py`, `xnative/ui/streamlit_app.py`.
-- Acceptance testleri: `tests/integration/test_phase3_jobs.py`.
-- Kanitlanan kapilar: completed job, attempt kaydi, expired lease recovery, retryable failure, max attempt sonrasi dead-letter, unknown job type dead-letter, generic enqueue/dedupe, bounded backpressure, priority aging, resource admission, durable cursor, versioned cache invalidation, durable token bucket, bounded micro-batch, bounded worker loop, stage timeout/fatal hata ayrimi, handler hata rollback, dead-letter listeleme, replay audit, API job gorunumu ve Streamlit helper.
+- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release ve unreferenced media GC davranisi.
 
 ## Sinirlar
 
-- Bu baseline mevcut 46 testin, content-script browser fixture check'in ve background -> API -> DB fixture check'in gectigini kanitlar; canli X selector drift, review ve feedback akisini kanitlamaz.
+- Bu baseline mevcut testlerin, content-script browser fixture check'in ve background -> API -> DB fixture check'in gectigini kanitlar; canli X selector drift, review ve feedback akisini kanitlamaz.
 - Docker Compose konfigurasyonu parse edildi; yerel Docker daemon calismadigi icin runtime health acceptance yapilmadi.
 - Multimodal model kalitesi ve performans SLO'lari henuz benchmark edilmedi.

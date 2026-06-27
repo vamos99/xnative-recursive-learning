@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 from PIL import Image, ImageDraw
 
-from xnative.media.media_store import store_local_media
+from xnative.media.media_store import garbage_collect_media, release_local_media, store_local_media
 from xnative.media.phash import (
     cluster_similar_hashes,
     difference_hash_file,
@@ -80,9 +80,47 @@ def test_store_local_media_returns_exact_and_perceptual_hashes(tmp_path, monkeyp
 
     source = tmp_path / "source.png"
     _save_pattern(source)
-    result = store_local_media(source)
+    result = store_local_media(source, reference_id="post-1:media-1")
 
     assert Path(result["local_path"]).exists()
     assert result["exact_sha256"] == exact_sha256_file(source)
     assert result["perceptual_hash"].startswith("dhash64-v1:")
     assert result["phash"] == result["perceptual_hash"]
+    assert result["reference_count"] == "1"
+
+
+def test_content_addressed_store_dedupes_references_and_garbage_collects(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    media_dir = tmp_path / "media"
+    fake_settings = SimpleNamespace(
+        media_dir=media_dir,
+        ensure_dirs=lambda: media_dir.mkdir(parents=True, exist_ok=True),
+    )
+    monkeypatch.setattr("xnative.media.media_store.settings", fake_settings)
+
+    source = tmp_path / "source.png"
+    same_bytes = tmp_path / "same-bytes.png"
+    _save_pattern(source)
+    same_bytes.write_bytes(source.read_bytes())
+
+    first = store_local_media(source, reference_id="post-a:media")
+    second = store_local_media(same_bytes, reference_id="post-b:media")
+    repeated = store_local_media(source, reference_id="post-a:media")
+
+    assert first["local_path"] == second["local_path"] == repeated["local_path"]
+    assert second["duplicate"] == "true"
+    assert repeated["reference_count"] == "2"
+    assert len(list(media_dir.glob("**/*.png"))) == 1
+
+    assert release_local_media(first["exact_sha256"], reference_id="post-a:media") == 1
+    assert release_local_media(first["exact_sha256"], reference_id="post-b:media") == 0
+
+    dry_run = garbage_collect_media(max_bytes=0, dry_run=True)
+    assert dry_run["deleted_files"] == 1
+    assert Path(first["local_path"]).exists()
+
+    result = garbage_collect_media(max_bytes=0, dry_run=False)
+    assert result["deleted_files"] == 1
+    assert not Path(first["local_path"]).exists()

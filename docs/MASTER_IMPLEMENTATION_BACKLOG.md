@@ -97,13 +97,13 @@ Bagimlilik: Faz 1 ve 3.
 2. `P4-002` `EKLE` dHash/pHash, Hamming threshold ve thumbnail tabanli benzer medya cluster testi. Durum: `DEVAM`.
 3. `P4-003` `EKLE` varsayilan metadata-only arsiv: X URL, gorunur metin, alt text, metrik snapshot ve provenance.
 4. `P4-004` `EKLE` opsiyonel yerel thumbnail/orijinal medya politikalari; telif/izin ve disk kotasi.
-5. `P4-005` `EKLE` content-addressed media store, referans sayimi, TTL, LRU ve garbage collection.
+5. `P4-005` `EKLE` content-addressed media store, referans sayimi, TTL, LRU ve garbage collection. Durum: `DEVAM`.
 6. `P4-006` `EKLE` bozuk/deleted URL durumu ve minimum kanit snapshot'i.
 7. `P4-007` `EKLE` video icin sinirli frame sampling, audio extraction ve duration limiti.
 
 Kabul kapisi: Benzer gorseller cluster olur; ayni dosya tek kez saklanir; kota asiminda kontrollu temizlik yapilir; silinen X linki kaydin geri kalanini bozmaz.
 
-Faz 4 kismi kanit: 2026-06-27 kosusunda `xnative/media/phash.py` eski SHA-256 prefix davranisindan ayrildi. `exact_sha256_file()` tam SHA-256 digest'i exact byte-level dedup icin, `difference_hash_file()` ise `dhash64-v1:<hex>` formatinda gercek perceptual hash icin kullanilir. `media_hashes_file()` ve `store_local_media()` exact/perceptual hash alanlarini ayri dondurur; backward-compatible `phash` alani perceptual hash'e esitlenir. `tests/unit/test_media_hashing.py` ayni byte fixture'da SHA esitligini, kucuk gorsel degisiklikte exact SHA farkli ama dHash Hamming mesafesi yakin davranisini, farkli gorselde uzak davranisini ve kucuk batch cluster sonucunu dogrular. Kalan P4 isleri: content-addressed store/refcount, kota/TTL/LRU GC, deleted URL snapshot ve video frame/audio lifecycle.
+Faz 4 kismi kanit: 2026-06-27 kosusunda `xnative/media/phash.py` eski SHA-256 prefix davranisindan ayrildi. `exact_sha256_file()` tam SHA-256 digest'i exact byte-level dedup icin, `difference_hash_file()` ise `dhash64-v1:<hex>` formatinda gercek perceptual hash icin kullanilir. `media_hashes_file()` ve `store_local_media()` exact/perceptual hash alanlarini ayri dondurur; backward-compatible `phash` alani perceptual hash'e esitlenir. `xnative/media/media_store.py` content-addressed path, manifest tabanli referans sayimi, duplicate blob engelleme, referans release ve unreferenced media GC davranisini saglar. `tests/unit/test_media_hashing.py` ayni byte fixture'da SHA esitligini, kucuk gorsel degisiklikte exact SHA farkli ama dHash Hamming mesafesi yakin davranisini, farkli gorselde uzak davranisini, kucuk batch cluster sonucunu, tek fiziksel dosyada iki referans davranisini ve referanssiz dosya GC'sini dogrular. Kalan P4 isleri: kalici DB-backed media lifecycle kaydi, explicit retention/TTL policy, deleted URL snapshot ve video frame/audio lifecycle.
 
 ### Faz 5 - Multimodal icerik anlama
 
