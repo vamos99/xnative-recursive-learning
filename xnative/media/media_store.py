@@ -31,6 +31,17 @@ class MediaRetentionPolicy:
 
 
 @dataclass(frozen=True)
+class MediaGarbageCollectionPolicy:
+    max_bytes: int
+    min_free_bytes: int = 0
+    protected_storage_policies: frozenset[str] = frozenset({"original"})
+
+    @property
+    def target_bytes(self) -> int:
+        return max(self.max_bytes - self.min_free_bytes, 0)
+
+
+@dataclass(frozen=True)
 class MediaStoreResult:
     local_path: str
     relative_path: str
@@ -218,9 +229,11 @@ def garbage_collect_media(
     max_bytes: int,
     dry_run: bool = True,
     now: int | None = None,
+    policy: MediaGarbageCollectionPolicy | None = None,
 ) -> dict[str, int]:
     """Delete expired local media or unreferenced media until under quota."""
 
+    active_policy = policy or MediaGarbageCollectionPolicy(max_bytes=max_bytes)
     settings.ensure_dirs()
     media_dir = settings.media_dir
     manifest = _load_manifest(media_dir)
@@ -239,7 +252,14 @@ def garbage_collect_media(
         (
             (exact_sha256, entry)
             for exact_sha256, entry in entries
-            if exact_sha256 in expired_hashes or len(entry.get("references", [])) == 0
+            if (
+                exact_sha256 in expired_hashes
+                or (
+                    len(entry.get("references", [])) == 0
+                    and str(entry.get("storage_policy") or "")
+                    not in active_policy.protected_storage_policies
+                )
+            )
         ),
         key=lambda item: (
             0 if item[0] in expired_hashes else 1,
@@ -249,10 +269,16 @@ def garbage_collect_media(
 
     deleted_files = 0
     expired_files = 0
+    quota_files = 0
+    protected_files = sum(
+        1
+        for _, entry in entries
+        if str(entry.get("storage_policy") or "") in active_policy.protected_storage_policies
+    )
     freed_bytes = 0
     for exact_sha256, entry in candidates:
         expired = exact_sha256 in expired_hashes
-        if not expired and total_bytes - freed_bytes <= max_bytes:
+        if not expired and total_bytes - freed_bytes <= active_policy.target_bytes:
             break
         byte_size = int(entry.get("byte_size") or 0)
         relative_path = str(entry.get("relative_path") or "")
@@ -268,6 +294,8 @@ def garbage_collect_media(
         deleted_files += 1
         if expired:
             expired_files += 1
+        else:
+            quota_files += 1
         freed_bytes += byte_size
         if not dry_run and len(entry.get("references", [])) == 0:
             files.pop(exact_sha256, None)
@@ -281,7 +309,10 @@ def garbage_collect_media(
         "freed_bytes": freed_bytes,
         "deleted_files": deleted_files,
         "expired_files": expired_files,
+        "quota_files": quota_files,
+        "protected_files": protected_files,
         "remaining_files": len(files) if not dry_run else len(entries),
+        "target_bytes": active_policy.target_bytes,
     }
 
 

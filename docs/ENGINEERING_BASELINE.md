@@ -15,7 +15,7 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-53 passed in 0.60s
+54 passed in 0.55s
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
@@ -46,7 +46,7 @@ background delivery accepted
 background -> API -> DB fixture ok
 
 .venv/bin/pytest -q tests/unit/test_media_hashing.py
-6 passed in 0.10s
+7 passed in 0.09s
 
 .venv/bin/pytest -q tests/integration/test_phase1_storage.py tests/unit/test_media_hashing.py
 13 passed in 0.23s
@@ -96,7 +96,7 @@ background -> API -> DB fixture ok
 - DB lifecycle migration: `xnative/db/migrations/0004_media_lifecycle.sql`.
 - DB lifecycle repository: `UnitOfWork.media_lifecycle`.
 - Acceptance testleri: `tests/unit/test_media_hashing.py`, `tests/integration/test_phase1_storage.py`.
-- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, unreferenced media GC, retention TTL sonrasi metadata-only gecis, silinmis remote URL snapshot davranisi ve SQLite-backed lifecycle refcount/idempotency.
+- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, unreferenced media GC, retention TTL sonrasi metadata-only gecis, silinmis remote URL snapshot davranisi, SQLite-backed lifecycle refcount/idempotency, quota/LRU deletion order, protected original policy ve min-free target davranisi.
 
 ## Sinirlar
 
