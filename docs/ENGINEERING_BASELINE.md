@@ -15,7 +15,7 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-52 passed in 0.61s
+53 passed in 0.60s
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
@@ -47,6 +47,9 @@ background -> API -> DB fixture ok
 
 .venv/bin/pytest -q tests/unit/test_media_hashing.py
 6 passed in 0.10s
+
+.venv/bin/pytest -q tests/integration/test_phase1_storage.py tests/unit/test_media_hashing.py
+13 passed in 0.23s
 ```
 
 ## Belge QA
@@ -90,8 +93,10 @@ background -> API -> DB fixture ok
 - Exact media hash: `xnative/media/phash.py::exact_sha256_file`.
 - Perceptual media hash: `xnative/media/phash.py::difference_hash_file` (`dhash64-v1`).
 - Local media store: `xnative/media/media_store.py`.
-- Acceptance testleri: `tests/unit/test_media_hashing.py`.
-- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, unreferenced media GC, retention TTL sonrasi metadata-only gecis ve silinmis remote URL snapshot davranisi.
+- DB lifecycle migration: `xnative/db/migrations/0004_media_lifecycle.sql`.
+- DB lifecycle repository: `UnitOfWork.media_lifecycle`.
+- Acceptance testleri: `tests/unit/test_media_hashing.py`, `tests/integration/test_phase1_storage.py`.
+- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, unreferenced media GC, retention TTL sonrasi metadata-only gecis, silinmis remote URL snapshot davranisi ve SQLite-backed lifecycle refcount/idempotency.
 
 ## Sinirlar
 

@@ -64,6 +64,7 @@ def test_migration_is_idempotent_and_checksum_verified(tmp_path) -> None:
 
     assert first == second
     assert "0001" in second
+    assert "0004" in second
 
 
 def test_capture_persistence_is_idempotent_and_enqueues_one_job(tmp_path) -> None:
@@ -147,3 +148,91 @@ def test_feature_record_requires_provenance(tmp_path) -> None:
     assert row["feature_version"] == "cheap-text-v1"
     assert row["config_hash"] == "config-sha256-test"
     assert result.capture_id in row["source_ids_json"]
+
+
+def test_media_lifecycle_repository_tracks_references_and_snapshots(tmp_path) -> None:
+    db_path = tmp_path / "phase4.sqlite3"
+    exact_sha = "a" * 64
+
+    with UnitOfWork(db_path) as uow:
+        first = uow.media_lifecycle.upsert_local_object(
+            exact_sha256=exact_sha,
+            relative_path="aa/aa/blob.png",
+            byte_size=123,
+            perceptual_hash="dhash64-v1:abcd",
+            storage_policy="thumbnail",
+            availability="local",
+            source_url="https://pbs.twimg.com/media/blob.jpg",
+            retention_reason="test",
+            retention_expires_at=200,
+            reference_id="post-1:media-1",
+            owner_type="post",
+            owner_id="post-1",
+            now=100,
+        )
+        duplicate = uow.media_lifecycle.upsert_local_object(
+            exact_sha256=exact_sha,
+            relative_path="aa/aa/blob.png",
+            byte_size=123,
+            perceptual_hash="dhash64-v1:abcd",
+            storage_policy="thumbnail",
+            availability="local",
+            source_url="https://pbs.twimg.com/media/blob.jpg",
+            retention_reason="test",
+            retention_expires_at=200,
+            reference_id="post-1:media-1",
+            owner_type="post",
+            owner_id="post-1",
+            now=101,
+        )
+        second_ref = uow.media_lifecycle.upsert_local_object(
+            exact_sha256=exact_sha,
+            reference_id="post-2:media-1",
+            owner_type="post",
+            owner_id="post-2",
+            now=102,
+        )
+        remaining = uow.media_lifecycle.release_reference(exact_sha, "post-1:media-1")
+        snapshot = uow.media_lifecycle.record_remote_snapshot(
+            source_url="https://pbs.twimg.com/media/deleted.jpg",
+            reason="http_404",
+            visible_text="Maçtan sonra tepki",
+            alt_text="tribün",
+            observed_at=300,
+            now=301,
+        )
+        snapshot_duplicate = uow.media_lifecycle.record_remote_snapshot(
+            source_url="https://pbs.twimg.com/media/deleted.jpg",
+            reason="http_404",
+            visible_text="Maçtan sonra tepki",
+            alt_text="tribün",
+            observed_at=300,
+            now=302,
+        )
+
+    conn = init_db(db_path)
+    object_row = conn.execute(
+        "SELECT * FROM local_media_objects WHERE exact_sha256=?",
+        (exact_sha,),
+    ).fetchone()
+    refs = conn.execute(
+        "SELECT reference_id FROM local_media_references WHERE exact_sha256=?",
+        (exact_sha,),
+    ).fetchall()
+    snapshot_rows = conn.execute("SELECT * FROM remote_media_snapshots").fetchall()
+
+    assert first.reference_count == 1
+    assert not first.duplicate_reference
+    assert duplicate.reference_count == 1
+    assert duplicate.duplicate_reference
+    assert second_ref.reference_count == 2
+    assert remaining == 1
+    assert object_row["reference_count"] == 1
+    assert object_row["storage_policy"] == "thumbnail"
+    assert object_row["source_url"] == "https://pbs.twimg.com/media/blob.jpg"
+    assert [row["reference_id"] for row in refs] == ["post-2:media-1"]
+    assert len(snapshot_rows) == 1
+    assert snapshot_rows[0]["id"] == snapshot.snapshot_id
+    assert snapshot_rows[0]["availability"] == "remote_unavailable"
+    assert not snapshot.duplicate
+    assert snapshot_duplicate.duplicate
