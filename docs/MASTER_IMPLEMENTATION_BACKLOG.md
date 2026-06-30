@@ -71,7 +71,7 @@ Bagimlilik: Faz 1.
 
 Kabul kapisi: Gercek veya kaydedilmis DOM fixture ile extension -> API -> DB akisi calisir; backend gecici kapaliyken veri kaybolmaz; credential/cookie toplanmaz; payload boyutu ve frekansi sinirlidir.
 
-Faz 2 kismi kanit: 2026-06-23 kosusunda `P2-001` icin `xnative/api/main.py`, `xnative/api/routes/health.py` ve `xnative/api/routes/capture.py` guncellendi. `POST /api/v1/captures`, gecici `POST /capture` alias'i, `GET /health` ve `GET /ready` gercek route olarak baglandi; capture handler Phase 1 repository katmanina yazar. `tests/integration/test_phase2_api_capture.py` route, readiness, idempotency, 413 payload limiti, 422 validation ve alias deprecation header davranisini dogrular. `P2-002` icin `extension/manifest.json` gereksiz `activeTab/scripting` izinlerinden arindirildi ve yalniz X + localhost host izinleri birakildi. `P2-003` icin `extension/background.js` basarili HTTP cevabi sonrasi outbox'tan dusen, backend kapaliyken local storage'da bekleyen, bounded outbox kullanan ve exponential backoff ile tekrar deneyen akisa gecti. `P2-004` icin `extension/content.js` post'u yalniz background outbox kabulunden sonra `xnativeCaptured` olarak isaretler; capture kapaliyken veya kabul basarisizken DOM tekrar denenebilir kalir. `P2-005..007` henuz tamam degildir; kaydedilmis DOM fixture kalite testi, ana/quote medya ayrimi ve manual archive akisi sonraki adimdir.
+Faz 2 kismi kanit: 2026-06-27 kosusunda `P2-001` icin `xnative/api/main.py`, `xnative/api/routes/health.py` ve `xnative/api/routes/capture.py` guncellendi. `POST /api/v1/captures`, gecici `POST /capture` alias'i, `GET /health` ve `GET /ready` gercek route olarak baglandi; capture handler Phase 1 repository katmanina yazar. `tests/integration/test_phase2_api_capture.py` route, readiness, idempotency, 413 payload limiti, 422 validation, alias deprecation header, parser query temizleme, credential-like raw-field redaction, avatar/UI media filtreleme, parse-quality selector propagation, manual archive fixture persistence, kaydedilmis DOM payload fixture -> API -> DB persistence ve post/quote media scope preservation davranisini dogrular. `scripts/qa/content_script_browser_check.sh` Playwright CLI ile gercek browser'da content script'i kaydedilmis DOM fixture uzerinde calistirir ve capture payload'ini dogrular. `scripts/qa/background_api_db_check.sh` background service-worker mantigini Chrome API stub ile calistirir, local FastAPI'ye teslim eder ve SQLite captured post/job/inbox/media persistence'i dogrular. `P2-002` icin `extension/manifest.json` gereksiz `activeTab/scripting` izinlerinden arindirildi ve yalniz X + localhost host izinleri birakildi. `P2-003` icin `extension/background.js` basarili HTTP cevabi sonrasi outbox'tan dusen, backend kapaliyken local storage'da bekleyen, bounded outbox kullanan ve exponential backoff ile tekrar deneyen akisa gecti. `P2-004` icin `extension/content.js` post'u yalniz background outbox kabulunden sonra `xnativeCaptured` olarak isaretler; capture kapaliyken veya kabul basarisizken DOM tekrar denenebilir kalir. `P2-005..007` parser/API/manual archive/recorded payload/content-script/background delivery seviyesinde otomatik kanita sahiptir. Kalan canli risk: gercek X sayfasinda selector drift smoke testi.
 
 ### Faz 3 - Ingestion, is kuyrugu ve idempotent pipeline
 
@@ -93,15 +93,17 @@ Faz 3 kismi kanit: 2026-06-25 kosusunda `xnative/db/repositories.py` generic job
 
 Bagimlilik: Faz 1 ve 3.
 
-1. `P4-001` `DUZELT` SHA kisaltmasini “pHash” diye adlandirmayi birak; SHA-256 exact dedup ve gercek perceptual hash'i ayir.
-2. `P4-002` `EKLE` dHash/pHash, Hamming threshold ve thumbnail tabanli benzer medya cluster testi.
+1. `P4-001` `DUZELT` SHA kisaltmasini “pHash” diye adlandirmayi birak; SHA-256 exact dedup ve gercek perceptual hash'i ayir. Durum: `TAMAM`.
+2. `P4-002` `EKLE` dHash/pHash, Hamming threshold ve thumbnail tabanli benzer medya cluster testi. Durum: `DEVAM`.
 3. `P4-003` `EKLE` varsayilan metadata-only arsiv: X URL, gorunur metin, alt text, metrik snapshot ve provenance.
 4. `P4-004` `EKLE` opsiyonel yerel thumbnail/orijinal medya politikalari; telif/izin ve disk kotasi.
-5. `P4-005` `EKLE` content-addressed media store, referans sayimi, TTL, LRU ve garbage collection.
+5. `P4-005` `EKLE` content-addressed media store, referans sayimi, TTL, LRU ve garbage collection. Durum: `DEVAM`.
 6. `P4-006` `EKLE` bozuk/deleted URL durumu ve minimum kanit snapshot'i.
 7. `P4-007` `EKLE` video icin sinirli frame sampling, audio extraction ve duration limiti.
 
 Kabul kapisi: Benzer gorseller cluster olur; ayni dosya tek kez saklanir; kota asiminda kontrollu temizlik yapilir; silinen X linki kaydin geri kalanini bozmaz.
+
+Faz 4 kismi kanit: 2026-06-27 kosusunda `xnative/media/phash.py` eski SHA-256 prefix davranisindan ayrildi. `exact_sha256_file()` tam SHA-256 digest'i exact byte-level dedup icin, `difference_hash_file()` ise `dhash64-v1:<hex>` formatinda gercek perceptual hash icin kullanilir. `media_hashes_file()` ve `store_local_media()` exact/perceptual hash alanlarini ayri dondurur; backward-compatible `phash` alani perceptual hash'e esitlenir. `xnative/media/media_store.py` content-addressed path, manifest tabanli referans sayimi, duplicate blob engelleme, referans release ve unreferenced media GC davranisini saglar. `tests/unit/test_media_hashing.py` ayni byte fixture'da SHA esitligini, kucuk gorsel degisiklikte exact SHA farkli ama dHash Hamming mesafesi yakin davranisini, farkli gorselde uzak davranisini, kucuk batch cluster sonucunu, tek fiziksel dosyada iki referans davranisini ve referanssiz dosya GC'sini dogrular. Kalan P4 isleri: kalici DB-backed media lifecycle kaydi, explicit retention/TTL policy, deleted URL snapshot ve video frame/audio lifecycle.
 
 ### Faz 5 - Multimodal icerik anlama
 

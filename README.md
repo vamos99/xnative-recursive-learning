@@ -24,6 +24,14 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
 - Browser extension permissions reduced and local outbox retry added for backend
   downtime. DOM posts are marked captured only after the background outbox accepts
   them.
+- Capture parsing now filters avatar/UI media, redacts credential-like raw fields,
+  carries parse-quality metadata and supports user-started manual archive import.
+- A recorded DOM capture payload fixture now verifies parser -> API -> DB
+  behavior and post/quote media scope preservation.
+- A Playwright browser QA script runs the content script against a recorded DOM
+  fixture and verifies the captured payload before background delivery.
+- A background-service-worker QA script delivers that payload to the local API
+  and verifies SQLite persistence without X API or credentials.
 - Durable job queue state transitions, lease recovery, retry/dead-letter handling
   and a normalize-capture worker runner were added.
 - Phase 3 worker runtime now includes generic job enqueue/dedupe, bounded
@@ -34,7 +42,8 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
   retry through `POST /api/v1/jobs/{id}/retry`, and a Streamlit operations panel.
 - Browser extension capture contract improved.
 - Manual fixture import and sample mode added.
-- Text, quote, media alt text, OCR fallback, pHash-style hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
+- Text, quote, media alt text, OCR fallback, exact SHA-256 media hashing, dHash64 perceptual hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
+- Local media storage now uses content-addressed paths with a runtime manifest for duplicate blob prevention, logical references and unreferenced-file garbage collection.
 - Pytest coverage added for the local MVP.
 - Docker and Docker Compose added.
 
@@ -75,12 +84,21 @@ PYTHONPATH=. python -m xnative.sample_pipeline
 ```
 
 The current tests exercise helper functions, the fixture sample, Phase 1 storage
-contracts, Phase 2 API capture persistence, payload limits, validation and the
-Phase 3 job queue/worker runtime core, including dead-letter visibility/retry,
+contracts, Phase 2 API capture persistence, parser hygiene, payload limits,
+validation, manual archive import, recorded DOM payload fixture flow and the
+browser content-script fixture flow and the Phase 3 job queue/worker runtime core,
+including dead-letter visibility/retry,
 stage error taxonomy, token bucket admission and micro-batch execution.
 They do not yet prove the recorded DOM
 fixture -> API -> database -> review -> feedback workflow. See the traceability
 matrix for the missing acceptance coverage.
+
+Optional browser QA:
+
+```bash
+scripts/qa/content_script_browser_check.sh
+scripts/qa/background_api_db_check.sh
+```
 
 ## Docker
 
@@ -116,7 +134,7 @@ It does not collect cookies, passwords, 2FA, hidden data, or credentials. It doe
 - `xnative/capture` - visible DOM/manual fixture parsing.
 - `xnative/domain` - Pydantic domain contracts and enums.
 - `xnative/ingestion` - normalization, deduplication, event building.
-- `xnative/media` - media metadata, optional OCR fallback, hashing, risk.
+- `xnative/media` - media metadata, optional OCR fallback, exact/perceptual hashing, content-addressed local storage, risk.
 - `xnative/nlp` - text cleaning, language fallback, style memory, quality filters.
 - `xnative/scoring` - event, candidate, risk, novelty/fatigue, final decision scores.
 - `xnative/generation` - template fallback suggestions and optional LLM adapter.

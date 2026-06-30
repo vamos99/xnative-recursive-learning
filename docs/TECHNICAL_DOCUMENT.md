@@ -71,7 +71,7 @@ Detaylı red/dene/eşikte kararları teknoloji radarındadır.
 - Ana API `/api/v1`; `/capture` extension için geçici alias.
 - Prototipteki 0-100 skorlar hedefte 0-1 canonical ölçeğe taşınır.
 - Mevcut `xnative/db/database.py` migration runner ile değiştirilir; veri kaybı olmadan fixture migration testi gerekir.
-- Mevcut truncated SHA “pHash” alanı exact hash olarak yeniden adlandırılır; gerçek perceptual hash ayrı sütundur.
+- Media hashing artık exact SHA-256 ve `dhash64-v1` perceptual hash olarak ayrıdır; legacy `phash` uyumluluk alanı perceptual hash değerine eşitlenir.
 - Sabit formüller ve toplamsal online weights yalnız baseline/challenger karşılaştırması için korunur; production champion sayılmaz.
 
 ## 7. Hata ve fallback sırası
@@ -96,4 +96,3 @@ Core komutları `TEST_PLAN.md` içindedir. Faz tamamlanması için ayrıca ilgil
 - `diagrams/learning_loop.mmd`: evaluation/champion/rollback.
 - `diagrams/domain_erd.mmd`: domain ilişkileri.
 - `diagrams/job_state.mmd`: durable queue state machine.
-

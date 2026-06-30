@@ -41,7 +41,7 @@ Tarih: 2026-06-22
 | `P2-CAP-004` | P2-005 | Quote + media fixture | Avatar/UI media diye alınmaz |
 | `P2-SEC-001` | P2 | Cookie/Authorization DOM/storage | Payload ve logda yok |
 
-2026-06-23 kismi kod kaniti: `tests/integration/test_phase2_api_capture.py`, `P2-001` icin `/health`, `/ready`, `/api/v1/captures`, gecici `/capture` alias, 413 payload limiti ve 422 validation davranisini dogrular. `node --check extension/background.js`, `node --check extension/content.js` ve `python -m json.tool extension/manifest.json` extension outbox/content JS syntax ve manifest parse kontrolunu dogrular. Bu kanit DOM fixture veya credential/cookie negatif testlerini henuz kapsamaz.
+2026-06-27 kismi kod kaniti: `tests/integration/test_phase2_api_capture.py`, `P2-001` icin `/health`, `/ready`, `/api/v1/captures`, gecici `/capture` alias, 413 payload limiti ve 422 validation davranisini dogrular. Ayni dosya parser seviyesinde query temizleme, credential-like raw-field redaction, avatar/UI media filtreleme, parse-quality selector propagation, manual archive fixture persistence, kaydedilmis DOM payload fixture -> API -> DB persistence ve post/quote media scope preservation davranisini dogrular. `scripts/qa/content_script_browser_check.sh` Playwright CLI ile gercek browser ortaminda content-script DOM fixture capture davranisini dogrular. `scripts/qa/background_api_db_check.sh` background service-worker -> local API -> SQLite persistence akisini dogrular. `node --check extension/background.js`, `node --check extension/content.js` ve `python -m json.tool extension/manifest.json` extension outbox/content JS syntax ve manifest parse kontrolunu dogrular.
 | `P3-JOB-001` | P3-001..003 | Worker running halde ölür | Lease sonrası iş yeniden alınır |
 | `P3-JOB-002` | P3-003 | Retryable hata 5 kez | Full jitter, sonra dead-letter |
 | `P3-JOB-003` | P3-007 | Backfill + live capture | Live iş starvation olmadan önce |
@@ -51,6 +51,8 @@ Tarih: 2026-06-22
 | `P4-MED-001` | P4-001..002 | Aynı byte ve resize/crop fixture | SHA exact; pHash near-duplicate ayrımı |
 | `P4-MED-002` | P4-005 | Aynı blob iki post | Tek dosya, iki referans |
 | `P4-MED-003` | P4-004..006 | Kota ve silinmiş URL | Policy ile GC; metadata/audit kalır |
+
+2026-06-27 kismi kod kaniti: `tests/unit/test_media_hashing.py`, `P4-MED-001` icin tam SHA-256 exact dedup ile `dhash64-v1` perceptual hash ayrimini dogrular. Ayni byte fixture exact/perceptual hash esitligini korur; kucuk gorsel degisikligi exact SHA'yi degistirirken Hamming threshold icinde near-duplicate kalir; farkli gorsel threshold disinda kalir; kucuk batch cluster sonucu `[[0, 1], [2]]` olarak dogrulanir. Ayni dosyanin iki logical reference ile tek content-addressed kopya olusturmasi ve referanslar birakildiktan sonra dry-run/real GC ile silinebilmesi `P4-MED-002` ve P4-005 icin kismi kanittir. Bu kanit P4-004..006 explicit retention/TTL policy, deleted URL snapshot ve media audit davranisini henuz kapsamaz.
 | `P5-MM-001` | P5-001..008 | Futbol kelimesi yok, görsel futbol | Belirsiz değilse topic evidence üretir |
 | `P5-MM-002` | P5-006 | Alakalı text + alakasız media | Contradiction/intent hypotheses; spam kesinliği yok |
 | `P5-MM-003` | P5-008 | Media eksik | Missing flag; relevance sıfırlanmaz |

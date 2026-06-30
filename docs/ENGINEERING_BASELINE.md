@@ -15,13 +15,13 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-41 passed in 0.53s
+52 passed in 0.61s
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
 
 .venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py
-80 files already formatted
+81 files already formatted
 
 .venv/bin/mypy xnative
 Success: no issues found in 74 source files
@@ -37,6 +37,16 @@ exit 0
 
 python -m json.tool extension/manifest.json
 exit 0
+
+scripts/qa/content_script_browser_check.sh
+content-script browser fixture ok
+
+scripts/qa/background_api_db_check.sh
+background delivery accepted
+background -> API -> DB fixture ok
+
+.venv/bin/pytest -q tests/unit/test_media_hashing.py
+6 passed in 0.10s
 ```
 
 ## Belge QA
@@ -63,7 +73,7 @@ exit 0
 - Extension outbox ve izinler: `extension/background.js`, `extension/manifest.json`.
 - Extension content capture davranisi: `extension/content.js`.
 - Acceptance testleri: `tests/integration/test_phase2_api_capture.py`.
-- Kanitlanan kapilar: `/health`, `/ready`, `POST /api/v1/captures`, gecici `/capture` alias, DB persistence, idempotent duplicate response, 413 payload limiti, 422 validation, extension JS syntax ve manifest JSON parse.
+- Kanitlanan kapilar: `/health`, `/ready`, `POST /api/v1/captures`, gecici `/capture` alias, DB persistence, idempotent duplicate response, 413 payload limiti, 422 validation, parser query temizleme, credential-like raw-field redaction, avatar/UI media filtreleme, parse-quality selector propagation, manual archive fixture persistence, recorded DOM payload fixture persistence, post/quote media scope preservation, browser content-script fixture capture, background -> API -> DB fixture delivery, extension JS syntax ve manifest JSON parse.
 
 ## Faz 3 kismi kod kaniti
 
@@ -75,8 +85,16 @@ exit 0
 - Acceptance testleri: `tests/integration/test_phase3_jobs.py`.
 - Kanitlanan kapilar: completed job, attempt kaydi, expired lease recovery, retryable failure, max attempt sonrasi dead-letter, unknown job type dead-letter, generic enqueue/dedupe, bounded backpressure, priority aging, resource admission, durable cursor, versioned cache invalidation, durable token bucket, bounded micro-batch, bounded worker loop, stage timeout/fatal hata ayrimi, handler hata rollback, dead-letter listeleme, replay audit, API job gorunumu ve Streamlit helper.
 
+## Faz 4 kismi kod kaniti
+
+- Exact media hash: `xnative/media/phash.py::exact_sha256_file`.
+- Perceptual media hash: `xnative/media/phash.py::difference_hash_file` (`dhash64-v1`).
+- Local media store: `xnative/media/media_store.py`.
+- Acceptance testleri: `tests/unit/test_media_hashing.py`.
+- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, unreferenced media GC, retention TTL sonrasi metadata-only gecis ve silinmis remote URL snapshot davranisi.
+
 ## Sinirlar
 
-- Bu baseline mevcut 41 testin gectigini kanitlar; kaydedilmis DOM fixture -> API -> DB -> review -> feedback akisini kanitlamaz.
+- Bu baseline mevcut testlerin, content-script browser fixture check'in ve background -> API -> DB fixture check'in gectigini kanitlar; canli X selector drift, review ve feedback akisini kanitlamaz.
 - Docker Compose konfigurasyonu parse edildi; yerel Docker daemon calismadigi icin runtime health acceptance yapilmadi.
 - Multimodal model kalitesi ve performans SLO'lari henuz benchmark edilmedi.
