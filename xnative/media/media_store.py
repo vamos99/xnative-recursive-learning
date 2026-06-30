@@ -259,9 +259,12 @@ def garbage_collect_media(
         target = media_dir / relative_path if relative_path else None
         if not dry_run and target is not None and target.exists():
             target.unlink()
+        if not dry_run:
             entry["local_deleted_at"] = current_time
             entry["availability"] = "metadata_only"
+            entry["local_deleted_reason"] = "retention_expired" if expired else "quota_unreferenced"
             entry["relative_path"] = ""
+            entry["byte_size"] = 0
         deleted_files += 1
         if expired:
             expired_files += 1

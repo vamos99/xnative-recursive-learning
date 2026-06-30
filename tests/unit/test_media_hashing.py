@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
 from PIL import Image, ImageDraw
 
-from xnative.media.media_store import garbage_collect_media, release_local_media, store_local_media
+from xnative.media.media_store import (
+    MediaRetentionPolicy,
+    garbage_collect_media,
+    record_remote_media_snapshot,
+    release_local_media,
+    store_local_media,
+)
 from xnative.media.phash import (
     cluster_similar_hashes,
     difference_hash_file,
@@ -124,3 +131,67 @@ def test_content_addressed_store_dedupes_references_and_garbage_collects(
     result = garbage_collect_media(max_bytes=0, dry_run=False)
     assert result["deleted_files"] == 1
     assert not Path(first["local_path"]).exists()
+
+
+def test_retention_ttl_deletes_local_file_but_keeps_metadata_snapshot(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    media_dir = tmp_path / "media"
+    fake_settings = SimpleNamespace(
+        media_dir=media_dir,
+        ensure_dirs=lambda: media_dir.mkdir(parents=True, exist_ok=True),
+    )
+    monkeypatch.setattr("xnative.media.media_store.settings", fake_settings)
+
+    source = tmp_path / "expiring.png"
+    _save_pattern(source)
+    stored = store_local_media(
+        source,
+        reference_id="post-c:media",
+        source_url="https://pbs.twimg.com/media/expiring.jpg",
+        retention_policy=MediaRetentionPolicy(
+            storage_policy="thumbnail",
+            ttl_seconds=10,
+            reason="test-retention",
+        ),
+        now=100,
+    )
+
+    result = garbage_collect_media(max_bytes=10_000_000, dry_run=False, now=111)
+    manifest = json.loads((media_dir / ".xnative_media_manifest.json").read_text())
+    entry = manifest["files"][stored["exact_sha256"]]
+
+    assert result["expired_files"] == 1
+    assert result["deleted_files"] == 1
+    assert not Path(stored["local_path"]).exists()
+    assert entry["availability"] == "metadata_only"
+    assert entry["local_deleted_reason"] == "retention_expired"
+    assert entry["source_url"] == "https://pbs.twimg.com/media/expiring.jpg"
+    assert entry["byte_size"] == 0
+    assert entry["references"] == ["post-c:media"]
+
+
+def test_remote_media_snapshot_records_deleted_url_evidence(tmp_path, monkeypatch) -> None:
+    media_dir = tmp_path / "media"
+    fake_settings = SimpleNamespace(
+        media_dir=media_dir,
+        ensure_dirs=lambda: media_dir.mkdir(parents=True, exist_ok=True),
+    )
+    monkeypatch.setattr("xnative.media.media_store.settings", fake_settings)
+
+    snapshot = record_remote_media_snapshot(
+        source_url="https://pbs.twimg.com/media/deleted.jpg",
+        reason="http_404",
+        visible_text="Maçtan sonra gelen tepki",
+        alt_text="tribün fotoğrafı",
+        observed_at=123,
+    )
+    manifest = json.loads((media_dir / ".xnative_media_manifest.json").read_text())
+    stored = manifest["remote_snapshots"][snapshot["snapshot_id"]]
+
+    assert snapshot["availability"] == "remote_unavailable"
+    assert stored["reason"] == "http_404"
+    assert stored["visible_text"] == "Maçtan sonra gelen tepki"
+    assert stored["alt_text"] == "tribün fotoğrafı"
+    assert stored["observed_at"] == 123
