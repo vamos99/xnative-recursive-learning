@@ -25,6 +25,7 @@ Code changes were allowed in this revision.
 - Added text cleaning, AI/news phrase filtering, quality filtering and style memory.
 - Added media risk, OCR fallback, exact SHA-256 media hashing and dHash64 perceptual hashing utilities.
 - Added content-addressed local media store manifest, reference counting and unreferenced media garbage collection.
+- Added SQLite-backed media lifecycle records for local media objects, logical references and remote URL snapshots.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.

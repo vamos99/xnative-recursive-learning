@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 import sqlite3
@@ -103,6 +104,10 @@ class UnitOfWork(AbstractContextManager["UnitOfWork"]):
     @property
     def rate_limits(self) -> RateLimitRepository:
         return RateLimitRepository(self.connection)
+
+    @property
+    def media_lifecycle(self) -> MediaLifecycleRepository:
+        return MediaLifecycleRepository(self.connection)
 
 
 class CaptureRepository:
@@ -272,6 +277,198 @@ class CaptureRepository:
             """,
             (new_uuid(), action, entity_type, entity_id, canonical_json(details), now),
         )
+
+
+@dataclass(frozen=True)
+class MediaLifecycleResult:
+    exact_sha256: str
+    reference_count: int
+    duplicate_reference: bool
+
+
+@dataclass(frozen=True)
+class RemoteMediaSnapshotResult:
+    snapshot_id: str
+    duplicate: bool
+
+
+class MediaLifecycleRepository:
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+
+    def upsert_local_object(
+        self,
+        *,
+        exact_sha256: str,
+        relative_path: str = "",
+        byte_size: int = 0,
+        perceptual_hash: str | None = None,
+        storage_policy: str = "metadata",
+        availability: str = "metadata_only",
+        source_url: str | None = None,
+        retention_reason: str | None = None,
+        retention_expires_at: int | None = None,
+        local_deleted_at: int | None = None,
+        local_deleted_reason: str | None = None,
+        reference_id: str | None = None,
+        owner_type: str | None = None,
+        owner_id: str | None = None,
+        now: int | None = None,
+    ) -> MediaLifecycleResult:
+        timestamp = now or utc_us()
+        self.conn.execute(
+            """
+            INSERT INTO local_media_objects(
+              exact_sha256, relative_path, byte_size, perceptual_hash,
+              storage_policy, availability, source_url, retention_reason,
+              retention_expires_at, local_deleted_at, local_deleted_reason,
+              reference_count, created_at, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+            ON CONFLICT(exact_sha256) DO UPDATE SET
+              relative_path=CASE
+                WHEN excluded.relative_path != '' THEN excluded.relative_path
+                ELSE local_media_objects.relative_path
+              END,
+              byte_size=CASE
+                WHEN excluded.byte_size > 0 THEN excluded.byte_size
+                ELSE local_media_objects.byte_size
+              END,
+              perceptual_hash=COALESCE(
+                excluded.perceptual_hash,
+                local_media_objects.perceptual_hash
+              ),
+              storage_policy=CASE
+                WHEN excluded.storage_policy != 'metadata' THEN excluded.storage_policy
+                ELSE local_media_objects.storage_policy
+              END,
+              availability=CASE
+                WHEN excluded.availability != 'metadata_only' THEN excluded.availability
+                ELSE local_media_objects.availability
+              END,
+              source_url=COALESCE(excluded.source_url, local_media_objects.source_url),
+              retention_reason=COALESCE(
+                excluded.retention_reason,
+                local_media_objects.retention_reason
+              ),
+              retention_expires_at=COALESCE(
+                excluded.retention_expires_at,
+                local_media_objects.retention_expires_at
+              ),
+              local_deleted_at=COALESCE(
+                excluded.local_deleted_at,
+                local_media_objects.local_deleted_at
+              ),
+              local_deleted_reason=COALESCE(
+                excluded.local_deleted_reason,
+                local_media_objects.local_deleted_reason
+              ),
+              updated_at=excluded.updated_at
+            """,
+            (
+                exact_sha256,
+                relative_path,
+                byte_size,
+                perceptual_hash,
+                storage_policy,
+                availability,
+                source_url,
+                retention_reason,
+                retention_expires_at,
+                local_deleted_at,
+                local_deleted_reason,
+                timestamp,
+                timestamp,
+            ),
+        )
+        duplicate_reference = False
+        if reference_id:
+            row = self.conn.execute(
+                """
+                SELECT id FROM local_media_references
+                WHERE exact_sha256=? AND reference_id=?
+                """,
+                (exact_sha256, reference_id),
+            ).fetchone()
+            duplicate_reference = row is not None
+            if row is None:
+                self.conn.execute(
+                    """
+                    INSERT INTO local_media_references(
+                      id, exact_sha256, reference_id, owner_type, owner_id, created_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (new_uuid(), exact_sha256, reference_id, owner_type, owner_id, timestamp),
+                )
+        reference_count = self._sync_reference_count(exact_sha256)
+        return MediaLifecycleResult(
+            exact_sha256=exact_sha256,
+            reference_count=reference_count,
+            duplicate_reference=duplicate_reference,
+        )
+
+    def release_reference(self, exact_sha256: str, reference_id: str) -> int:
+        self.conn.execute(
+            """
+            DELETE FROM local_media_references
+            WHERE exact_sha256=? AND reference_id=?
+            """,
+            (exact_sha256, reference_id),
+        )
+        return self._sync_reference_count(exact_sha256)
+
+    def record_remote_snapshot(
+        self,
+        *,
+        source_url: str,
+        reason: str,
+        visible_text: str = "",
+        alt_text: str = "",
+        observed_at: int | None = None,
+        now: int | None = None,
+    ) -> RemoteMediaSnapshotResult:
+        timestamp = now or utc_us()
+        observed = observed_at or timestamp
+        snapshot_id = hashlib.sha256(
+            f"{source_url.strip()}|{reason}|{observed}".encode()
+        ).hexdigest()
+        existing = self.conn.execute(
+            "SELECT id FROM remote_media_snapshots WHERE id=?",
+            (snapshot_id,),
+        ).fetchone()
+        if existing is not None:
+            return RemoteMediaSnapshotResult(snapshot_id=snapshot_id, duplicate=True)
+        self.conn.execute(
+            """
+            INSERT INTO remote_media_snapshots(
+              id, source_url, reason, visible_text, alt_text,
+              observed_at, availability, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, 'remote_unavailable', ?)
+            """,
+            (snapshot_id, source_url, reason, visible_text, alt_text, observed, timestamp),
+        )
+        return RemoteMediaSnapshotResult(snapshot_id=snapshot_id, duplicate=False)
+
+    def _sync_reference_count(self, exact_sha256: str) -> int:
+        row = self.conn.execute(
+            """
+            SELECT COUNT(*) AS c FROM local_media_references
+            WHERE exact_sha256=?
+            """,
+            (exact_sha256,),
+        ).fetchone()
+        reference_count = int(row["c"])
+        self.conn.execute(
+            """
+            UPDATE local_media_objects
+            SET reference_count=?, updated_at=?
+            WHERE exact_sha256=?
+            """,
+            (reference_count, utc_us(), exact_sha256),
+        )
+        return reference_count
 
 
 class JobRepository:

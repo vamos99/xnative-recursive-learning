@@ -21,7 +21,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | Feedback learning | P10 | DB helper var, pipeline disi | Feedback -> model -> score E2E |
 | Gercek review UI | P11 | Bos Streamlit dosyasi | UI E2E ve screenshot QA |
 | Worker/retry | P3, P12 | Durable job tablosu, capture enqueue, generic enqueue/dedupe, tekil claim, lease recovery, savepoint rollback, retry, backpressure, resource admission, priority aging, cursor/cache, token bucket, micro-batch, worker loop, API job gorunumu ve Streamlit dead-letter panel temeli var | `tests/integration/test_phase3_jobs.py` + restart/runtime UI smoke testi |
-| Arsiv/retention | P4 | Kismi: content-addressed local media store, manifest refcount, duplicate blob engelleme ve referanssiz dosya GC testi var; explicit retention/TTL, deleted URL snapshot ve audit henuz eksik | `tests/unit/test_media_hashing.py` |
+| Arsiv/retention | P4 | Kismi: content-addressed local media store, manifest refcount, duplicate blob engelleme, referanssiz dosya GC, TTL metadata-only gecis, remote URL snapshot ve DB-backed lifecycle repository var; quota/LRU hardening, media audit ve video lifecycle henuz eksik | `tests/unit/test_media_hashing.py` + `tests/integration/test_phase1_storage.py` |
 | Docker acceptance | P13 | Config parse olur; runtime kaniti yok | Health/readiness compose test |
 | Dokuman dogrulugu | P14 | Uygulama dokumanlari v1.0 final; kod kanitlari fazlarla eklenecek | Kod-test-doc cross-check + generated DOCX/PDF QA |
 | Hedef donanimda surekli calisma | P5-009, P12 | Tasarim guncellendi; benchmark yok | 8 GB/i5/GTX 1050 soak ve OOM testi |

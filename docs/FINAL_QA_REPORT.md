@@ -18,7 +18,7 @@ Status: Not release-ready
 - The Streamlit file defines `run_app()` but never calls it; the required review workflow does not exist.
 - The sample pipeline does not persist posts, events, media or suggestions and does not use learned weights.
 - All ten fixture posts receive the same three template texts.
-- Exact SHA-256 and `dhash64-v1` perceptual image hashing are separated; content-addressed local storage, manifest refcount and unreferenced-file GC have unit coverage. Full retention/TTL, deleted URL snapshot and media audit are still missing.
+- Exact SHA-256 and `dhash64-v1` perceptual image hashing are separated; content-addressed local storage, manifest refcount, retention TTL metadata-only transition, deleted URL snapshot, SQLite lifecycle records and unreferenced-file GC have unit/integration coverage. Quota/LRU hardening, media audit and video/audio lifecycle are still missing.
 - OCR, media storage, style retrieval, novelty, bandit and learning helpers are disconnected from the main pipeline.
 - The worker now has a durable/retryable Phase 3 core and queue/dead-letter operations panel, but the full pipeline stage chain is still missing.
 - Docker runtime health was not verified because the local Docker daemon was unavailable.

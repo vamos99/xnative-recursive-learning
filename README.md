@@ -43,7 +43,7 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
 - Browser extension capture contract improved.
 - Manual fixture import and sample mode added.
 - Text, quote, media alt text, OCR fallback, exact SHA-256 media hashing, dHash64 perceptual hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
-- Local media storage now uses content-addressed paths with a runtime manifest for duplicate blob prevention, logical references and unreferenced-file garbage collection.
+- Local media storage now uses content-addressed paths with a runtime manifest and SQLite lifecycle records for duplicate blob prevention, logical references, retention snapshots and unreferenced-file garbage collection.
 - Pytest coverage added for the local MVP.
 - Docker and Docker Compose added.
 
