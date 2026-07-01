@@ -296,6 +296,23 @@ class MediaLifecycleRepository:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
 
+    def _audit(
+        self,
+        *,
+        action: str,
+        entity_type: str,
+        entity_id: str,
+        details: Mapping[str, object],
+        now: int,
+    ) -> None:
+        self.conn.execute(
+            """
+            INSERT INTO audit_log(id, action, entity_type, entity_id, details_json, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (new_uuid(), action, entity_type, entity_id, canonical_json(details), now),
+        )
+
     def upsert_local_object(
         self,
         *,
@@ -316,6 +333,13 @@ class MediaLifecycleRepository:
         now: int | None = None,
     ) -> MediaLifecycleResult:
         timestamp = now or utc_us()
+        existing_object = self.conn.execute(
+            """
+            SELECT exact_sha256 FROM local_media_objects
+            WHERE exact_sha256=?
+            """,
+            (exact_sha256,),
+        ).fetchone()
         self.conn.execute(
             """
             INSERT INTO local_media_objects(
@@ -402,21 +426,86 @@ class MediaLifecycleRepository:
                     (new_uuid(), exact_sha256, reference_id, owner_type, owner_id, timestamp),
                 )
         reference_count = self._sync_reference_count(exact_sha256)
+        self._audit(
+            action="media.object.upserted",
+            entity_type="local_media_object",
+            entity_id=exact_sha256,
+            details={
+                "new_object": existing_object is None,
+                "relative_path": relative_path,
+                "byte_size": byte_size,
+                "perceptual_hash_present": perceptual_hash is not None,
+                "storage_policy": storage_policy,
+                "availability": availability,
+                "source_url_present": source_url is not None,
+                "retention_reason": retention_reason,
+                "retention_expires_at": retention_expires_at,
+                "local_deleted_reason": local_deleted_reason,
+                "reference_id": reference_id,
+                "owner_type": owner_type,
+                "owner_id": owner_id,
+                "reference_count": reference_count,
+                "duplicate_reference": duplicate_reference,
+            },
+            now=timestamp,
+        )
+        if reference_id:
+            self._audit(
+                action=(
+                    "media.reference.duplicate" if duplicate_reference else "media.reference.added"
+                ),
+                entity_type="local_media_object",
+                entity_id=exact_sha256,
+                details={
+                    "reference_id": reference_id,
+                    "owner_type": owner_type,
+                    "owner_id": owner_id,
+                    "reference_count": reference_count,
+                },
+                now=timestamp,
+            )
         return MediaLifecycleResult(
             exact_sha256=exact_sha256,
             reference_count=reference_count,
             duplicate_reference=duplicate_reference,
         )
 
-    def release_reference(self, exact_sha256: str, reference_id: str) -> int:
-        self.conn.execute(
+    def release_reference(
+        self,
+        exact_sha256: str,
+        reference_id: str,
+        *,
+        now: int | None = None,
+    ) -> int:
+        timestamp = now or utc_us()
+        existing = self.conn.execute(
+            """
+            SELECT owner_type, owner_id FROM local_media_references
+            WHERE exact_sha256=? AND reference_id=?
+            """,
+            (exact_sha256, reference_id),
+        ).fetchone()
+        deleted = self.conn.execute(
             """
             DELETE FROM local_media_references
             WHERE exact_sha256=? AND reference_id=?
             """,
             (exact_sha256, reference_id),
+        ).rowcount
+        remaining = self._sync_reference_count(exact_sha256)
+        self._audit(
+            action="media.reference.released" if deleted else "media.reference.release_missing",
+            entity_type="local_media_object",
+            entity_id=exact_sha256,
+            details={
+                "reference_id": reference_id,
+                "owner_type": existing["owner_type"] if existing is not None else None,
+                "owner_id": existing["owner_id"] if existing is not None else None,
+                "reference_count": remaining,
+            },
+            now=timestamp,
         )
-        return self._sync_reference_count(exact_sha256)
+        return remaining
 
     def record_remote_snapshot(
         self,
@@ -438,6 +527,18 @@ class MediaLifecycleRepository:
             (snapshot_id,),
         ).fetchone()
         if existing is not None:
+            self._audit(
+                action="media.remote_snapshot.duplicate",
+                entity_type="remote_media_snapshot",
+                entity_id=snapshot_id,
+                details={
+                    "source_url": source_url,
+                    "reason": reason,
+                    "observed_at": observed,
+                    "availability": "remote_unavailable",
+                },
+                now=timestamp,
+            )
             return RemoteMediaSnapshotResult(snapshot_id=snapshot_id, duplicate=True)
         self.conn.execute(
             """
@@ -448,6 +549,20 @@ class MediaLifecycleRepository:
             VALUES (?, ?, ?, ?, ?, ?, 'remote_unavailable', ?)
             """,
             (snapshot_id, source_url, reason, visible_text, alt_text, observed, timestamp),
+        )
+        self._audit(
+            action="media.remote_snapshot.recorded",
+            entity_type="remote_media_snapshot",
+            entity_id=snapshot_id,
+            details={
+                "source_url": source_url,
+                "reason": reason,
+                "visible_text_present": visible_text != "",
+                "alt_text_present": alt_text != "",
+                "observed_at": observed,
+                "availability": "remote_unavailable",
+            },
+            now=timestamp,
         )
         return RemoteMediaSnapshotResult(snapshot_id=snapshot_id, duplicate=False)
 
