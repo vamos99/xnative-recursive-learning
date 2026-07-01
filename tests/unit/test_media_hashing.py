@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from PIL import Image, ImageDraw
 
 from xnative.media.media_store import (
+    MediaGarbageCollectionPolicy,
     MediaRetentionPolicy,
     garbage_collect_media,
     record_remote_media_snapshot,
@@ -195,3 +196,65 @@ def test_remote_media_snapshot_records_deleted_url_evidence(tmp_path, monkeypatc
     assert stored["visible_text"] == "Maçtan sonra gelen tepki"
     assert stored["alt_text"] == "tribün fotoğrafı"
     assert stored["observed_at"] == 123
+
+
+def test_garbage_collection_policy_uses_lru_and_protects_originals(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    media_dir = tmp_path / "media"
+    fake_settings = SimpleNamespace(
+        media_dir=media_dir,
+        ensure_dirs=lambda: media_dir.mkdir(parents=True, exist_ok=True),
+    )
+    monkeypatch.setattr("xnative.media.media_store.settings", fake_settings)
+
+    oldest = tmp_path / "oldest.png"
+    newest = tmp_path / "newest.png"
+    protected = tmp_path / "protected.png"
+    _save_pattern(oldest, variant="base")
+    _save_pattern(newest, variant="near")
+    _save_pattern(protected, variant="different")
+
+    stored_oldest = store_local_media(
+        oldest,
+        reference_id="oldest",
+        retention_policy=MediaRetentionPolicy(storage_policy="thumbnail"),
+        now=100,
+    )
+    stored_newest = store_local_media(
+        newest,
+        reference_id="newest",
+        retention_policy=MediaRetentionPolicy(storage_policy="thumbnail"),
+        now=200,
+    )
+    stored_protected = store_local_media(
+        protected,
+        reference_id="protected",
+        retention_policy=MediaRetentionPolicy(storage_policy="original"),
+        now=50,
+    )
+    release_local_media(stored_oldest["exact_sha256"], reference_id="oldest")
+    release_local_media(stored_newest["exact_sha256"], reference_id="newest")
+    release_local_media(stored_protected["exact_sha256"], reference_id="protected")
+
+    total_size = sum(
+        Path(row["local_path"]).stat().st_size
+        for row in (stored_oldest, stored_newest, stored_protected)
+    )
+    newest_size = Path(stored_newest["local_path"]).stat().st_size
+    protected_size = Path(stored_protected["local_path"]).stat().st_size
+    policy = MediaGarbageCollectionPolicy(
+        max_bytes=total_size,
+        min_free_bytes=newest_size + 1,
+    )
+
+    result = garbage_collect_media(max_bytes=total_size, dry_run=False, policy=policy)
+
+    assert result["quota_files"] == 1
+    assert result["protected_files"] == 1
+    assert result["target_bytes"] == total_size - newest_size - 1
+    assert not Path(stored_oldest["local_path"]).exists()
+    assert Path(stored_newest["local_path"]).exists()
+    assert Path(stored_protected["local_path"]).exists()
+    assert result["total_bytes_after"] == newest_size + protected_size
