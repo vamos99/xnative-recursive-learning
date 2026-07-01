@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 
 import pytest
@@ -192,7 +193,7 @@ def test_media_lifecycle_repository_tracks_references_and_snapshots(tmp_path) ->
             owner_id="post-2",
             now=102,
         )
-        remaining = uow.media_lifecycle.release_reference(exact_sha, "post-1:media-1")
+        remaining = uow.media_lifecycle.release_reference(exact_sha, "post-1:media-1", now=103)
         snapshot = uow.media_lifecycle.record_remote_snapshot(
             source_url="https://pbs.twimg.com/media/deleted.jpg",
             reason="http_404",
@@ -220,6 +221,22 @@ def test_media_lifecycle_repository_tracks_references_and_snapshots(tmp_path) ->
         (exact_sha,),
     ).fetchall()
     snapshot_rows = conn.execute("SELECT * FROM remote_media_snapshots").fetchall()
+    audit_rows = conn.execute(
+        """
+        SELECT action, entity_type, entity_id, details_json FROM audit_log
+        WHERE entity_id IN (?, ?, ?)
+        ORDER BY created_at, action
+        """,
+        (exact_sha, snapshot.snapshot_id, snapshot_duplicate.snapshot_id),
+    ).fetchall()
+    audit_actions = [row["action"] for row in audit_rows]
+    duplicate_ref_audit = next(
+        row for row in audit_rows if row["action"] == "media.reference.duplicate"
+    )
+    release_audit = next(row for row in audit_rows if row["action"] == "media.reference.released")
+    snapshot_audit = next(
+        row for row in audit_rows if row["action"] == "media.remote_snapshot.recorded"
+    )
 
     assert first.reference_count == 1
     assert not first.duplicate_reference
@@ -236,3 +253,12 @@ def test_media_lifecycle_repository_tracks_references_and_snapshots(tmp_path) ->
     assert snapshot_rows[0]["availability"] == "remote_unavailable"
     assert not snapshot.duplicate
     assert snapshot_duplicate.duplicate
+    assert audit_actions.count("media.object.upserted") == 3
+    assert audit_actions.count("media.reference.added") == 2
+    assert audit_actions.count("media.reference.duplicate") == 1
+    assert audit_actions.count("media.reference.released") == 1
+    assert audit_actions.count("media.remote_snapshot.recorded") == 1
+    assert audit_actions.count("media.remote_snapshot.duplicate") == 1
+    assert json.loads(duplicate_ref_audit["details_json"])["reference_count"] == 1
+    assert json.loads(release_audit["details_json"])["reference_count"] == 1
+    assert json.loads(snapshot_audit["details_json"])["visible_text_present"]
