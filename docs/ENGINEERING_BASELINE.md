@@ -93,10 +93,11 @@ background -> API -> DB fixture ok
 - Exact media hash: `xnative/media/phash.py::exact_sha256_file`.
 - Perceptual media hash: `xnative/media/phash.py::difference_hash_file` (`dhash64-v1`).
 - Local media store: `xnative/media/media_store.py`.
+- Video/audio lifecycle planner: `xnative/media/frame_sampler.py`.
 - DB lifecycle migration: `xnative/db/migrations/0004_media_lifecycle.sql`.
 - DB lifecycle repository: `UnitOfWork.media_lifecycle`.
-- Acceptance testleri: `tests/unit/test_media_hashing.py`, `tests/integration/test_phase1_storage.py`.
-- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, media lifecycle audit eventleri, unreferenced media GC, retention TTL sonrasi metadata-only gecis, silinmis remote URL snapshot davranisi, SQLite-backed lifecycle refcount/idempotency, quota/LRU deletion order, protected original policy ve min-free target davranisi.
+- Acceptance testleri: `tests/unit/test_media_hashing.py`, `tests/unit/test_video_audio_lifecycle.py`, `tests/integration/test_phase1_storage.py`.
+- Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, media lifecycle audit eventleri, unreferenced media GC, retention TTL sonrasi metadata-only gecis, silinmis remote URL snapshot davranisi, SQLite-backed lifecycle refcount/idempotency, quota/LRU deletion order, protected original policy, min-free target davranisi, video/gif icin sinirli frame offset plani, video/audio duration gate ve sinirli audio extraction karari.
 
 ## Sinirlar
 

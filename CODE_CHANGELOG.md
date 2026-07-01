@@ -28,6 +28,7 @@ Code changes were allowed in this revision.
 - Added SQLite-backed media lifecycle records for local media objects, logical references and remote URL snapshots.
 - Added media garbage-collection policy for quota/LRU cleanup, min-free-byte targets and protected original media.
 - Added media lifecycle audit events for local object upserts, reference changes and remote snapshot records.
+- Added bounded video/audio lifecycle planning for frame offsets, duration gates and limited audio extraction decisions.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.
