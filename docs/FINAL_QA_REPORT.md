@@ -20,6 +20,7 @@ Status: Not release-ready
 - All ten fixture posts receive the same three template texts.
 - Exact SHA-256 and `dhash64-v1` perceptual image hashing are separated; content-addressed local storage, manifest refcount, retention TTL metadata-only transition, deleted URL snapshot, SQLite lifecycle records, media lifecycle audit events, protected-original quota/LRU policy, unreferenced-file GC, bounded video/GIF frame planning and audio duration gates have unit/integration coverage. Real media decode/OCR/ASR remains Phase 5 work.
 - OCR, media storage, style retrieval, novelty, bandit and learning helpers are disconnected from the main pipeline.
+- A local multimodal evidence baseline now combines text, quote, alt/OCR, audio-video presence, relationship signals and missingness without paid APIs; embedding, CLIP and ASR are still missing.
 - The worker now has a durable/retryable Phase 3 core and queue/dead-letter operations panel, but the full pipeline stage chain is still missing.
 - Docker runtime health was not verified because the local Docker daemon was unavailable.
 - Tests now cover recorded DOM fixture integration and Phase 4 media hashing basics; they still do not cover OCR integration, UI, Docker health or end-to-end learning.

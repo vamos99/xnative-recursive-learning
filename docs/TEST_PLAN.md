@@ -57,6 +57,8 @@ Tarih: 2026-06-22
 | `P5-MM-001` | P5-001..008 | Futbol kelimesi yok, görsel futbol | Belirsiz değilse topic evidence üretir |
 | `P5-MM-002` | P5-006 | Alakalı text + alakasız media | Contradiction/intent hypotheses; spam kesinliği yok |
 | `P5-MM-003` | P5-008 | Media eksik | Missing flag; relevance sıfırlanmaz |
+
+2026-07-02 kismi kod kaniti: `tests/unit/test_multimodal_evidence.py`, text belirsizken alt/OCR gorsel kanitinin topic adaylari uretmesini, media eksikken bunun negatif relevance olarak sayilmamasini, video OCR/audio-video sinyalinin aciklanabilir olmasini ve legacy/domain capture adapter davranisini dogrular. Bu kanit embedding, CLIP, ASR ve supervised confidence calibration davranisini henuz kapsamaz.
 | `P5-MM-004` | P5-009 | GPU OOM/model yok | CPU/cheap fallback; job kaybolmaz |
 | `P5-ALG-001` | P5-010 | NB/logistic/SGD time split | Leakage audit ve learning curve raporu |
 | `P5-CLIP-001` | P5-012 | Türkçe zero-shot golden set | Quality + CPU/GPU/RSS raporu |
