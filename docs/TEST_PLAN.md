@@ -60,6 +60,8 @@ Tarih: 2026-06-22
 
 2026-07-02 kismi kod kaniti: `tests/unit/test_multimodal_evidence.py`, text belirsizken alt/OCR gorsel kanitinin topic adaylari uretmesini, media eksikken bunun negatif relevance olarak sayilmamasini, video OCR/audio-video sinyalinin aciklanabilir olmasini ve legacy/domain capture adapter davranisini dogrular. Bu kanit embedding, CLIP, ASR ve supervised confidence calibration davranisini henuz kapsamaz.
 | `P5-MM-004` | P5-009 | GPU OOM/model yok | CPU/cheap fallback; job kaybolmaz |
+
+2026-07-03 kismi kod kaniti: `tests/unit/test_hardware_preflight.py`, P5-009 icin GPU bilinmiyor/dusuk VRAM durumunda CPU fallback, RSS soft limit asiminda agir is bloklama ve model unload sinyali, GPU/VRAM uygunken GPU kabul, CPU fallback kapaliyken reject ve tahmini RAM soft limit asiminda defer davranisini dogrular. Bu kanit gercek hedef cihaz soak, GPU driver/CUDA runtime ve uzun sureli OOM recovery kosusunu henuz kapsamaz.
 | `P5-ALG-001` | P5-010 | NB/logistic/SGD time split | Leakage audit ve learning curve raporu |
 | `P5-CLIP-001` | P5-012 | Türkçe zero-shot golden set | Quality + CPU/GPU/RSS raporu |
 | `P6-RET-001` | P6-002 | Lexical ve semantic query set | BM25, dense, RRF Recall@K/NDCG raporu |

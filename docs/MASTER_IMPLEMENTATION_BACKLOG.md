@@ -117,14 +117,14 @@ Bagimlilik: Faz 3 ve 4.
 6. `P5-006` `EKLE` text-image uyum, tamamlayicilik ve bilincli uyumsuzluk sinyalleri. Durum: `DEVAM`.
 7. `P5-007` `EKLE` “futbol kelimesi yok ama futbol baglami var” weak-supervision test seti.
 8. `P5-008` `EKLE` modality missingness ve confidence calibration; eksik medya “alakasiz” sayilmasin. Durum: `DEVAM`.
-9. `P5-009` `EKLE` 8 GB RAM/GTX 1050 hardware preflight, CPU fallback, tek-agir-model scheduler ve OOM recovery.
+9. `P5-009` `EKLE` 8 GB RAM/GTX 1050 hardware preflight, CPU fallback, tek-agir-model scheduler ve OOM recovery. Durum: `DEVAM`.
 10. `P5-010` `EKLE` text algoritma benchmarki: TF-IDF/HashingVectorizer, MultinomialNB, logistic regression ve online SGD; zaman split'i ve learning curve.
 11. `P5-011` `EKLE` confidence-aware late-fusion baseline; logistic model ile HistGradientBoosting/LightGBM challenger ve missing-modality ablation.
 12. `P5-012` `EKLE` kucuk pretrained OpenCLIP/MobileCLIP benchmarki: zero-shot Turkce prompt, image-text retrieval, contradiction feature, CPU/GPU/ONNX-int8 ve lisans profili.
 
 Kabul kapisi: Metin, gorsel, quote ve OCR tek basina veya birlikte konu kaniti uretebilir; her modality katkisi aciklanabilir; model yoklugunda pipeline calismaya devam eder.
 
-Faz 5 kismi kanit: `xnative/media/multimodal_evidence.py`, text/quote/visual/audio-video modality kanitlarini, topic adaylarini, OCR/alt-text fallback durumunu, missing modality bilgisini ve text-media iliski sinyalini zorunlu dis servis olmadan uretir. `tests/unit/test_multimodal_evidence.py`, futbol kelimesi metinde yokken gorsel/alt/OCR kanitinin konu saglamasini, eksik medyanin negatif sayilmamasini, video OCR/audio-video sinyalini ve hem legacy capture dataclass hem domain `CapturedPost` adapter davranisini dogrular. Bu kanit henuz embedding, CLIP, ASR, confidence calibration modeli veya hardware preflight'i kapsamaz.
+Faz 5 kismi kanit: `xnative/media/multimodal_evidence.py`, text/quote/visual/audio-video modality kanitlarini, topic adaylarini, OCR/alt-text fallback durumunu, missing modality bilgisini ve text-media iliski sinyalini zorunlu dis servis olmadan uretir. `tests/unit/test_multimodal_evidence.py`, futbol kelimesi metinde yokken gorsel/alt/OCR kanitinin konu saglamasini, eksik medyanin negatif sayilmamasini, video OCR/audio-video sinyalini ve hem legacy capture dataclass hem domain `CapturedPost` adapter davranisini dogrular. `xnative/runtime/hardware.py`, 8 GB RAM/GTX 1050 sinifi hedef icin RSS soft limit, CPU fallback, GPU/VRAM gate, tek agir model concurrency ve unload/defer kararini aciklanabilir hale getirir. `tests/unit/test_hardware_preflight.py`, GPU bilinmezken CPU fallback, RSS soft limit asimi, GPU kabul, CPU fallback kapali reject ve RAM tahmini soft limit asimi davranisini dogrular. Bu kanit henuz embedding, CLIP, ASR, confidence calibration modeli veya gercek soak benchmark'ini kapsamaz.
 
 ### Faz 6 - Olay belleği, baglam ve semantik arsiv
 
