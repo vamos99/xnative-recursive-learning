@@ -24,7 +24,7 @@ Bu matris, gereksinimlerin belge/kod/test kanitlarini baglar. Exact sozlesme `IM
 | Arsiv/retention | P4 | Content-addressed local media store, manifest refcount, duplicate blob engelleme, referanssiz dosya GC, TTL metadata-only gecis, quota/LRU policy, protected original policy, remote URL snapshot, DB-backed lifecycle repository, audit eventleri ve video/audio lifecycle gate var; gercek decode/OCR/ASR Faz 5 kapsami | `tests/unit/test_media_hashing.py` + `tests/unit/test_video_audio_lifecycle.py` + `tests/integration/test_phase1_storage.py` |
 | Docker acceptance | P13 | Config parse olur; runtime kaniti yok | Health/readiness compose test |
 | Dokuman dogrulugu | P14 | Uygulama dokumanlari v1.0 final; kod kanitlari fazlarla eklenecek | Kod-test-doc cross-check + generated DOCX/PDF QA |
-| Hedef donanimda surekli calisma | P5-009, P12 | Tasarim guncellendi; benchmark yok | 8 GB/i5/GTX 1050 soak ve OOM testi |
+| Hedef donanimda surekli calisma | P5-009, P12 | Kismi: hardware preflight, RSS soft limit, CPU fallback, GPU/VRAM gate, tek agir model admission policy ve `xnative-preflight` hedef makine raporu var; benchmark/soak yok | `tests/unit/test_hardware_preflight.py` + 8 GB/i5/GTX 1050 soak ve OOM testi |
 | Gemini opsiyonel enrichment | P9-004, P9-007 | Politika dogrulandi; adapter yok | Proje tier/kota/cost/fallback integration |
 | Algoritma secimi ve model terfisi | P5-010..012, P6-007..010, P8-008..010, P10-008..010, P12-007..008, P13-007 | Karar matrisi ve teknoloji radari var; deney altyapisi yok | Time-split benchmark + resource profile + champion/challenger kaydi |
 | CLIP tabanli gorsel-metin kaniti | P5-012 | Karar ve benchmark kapisi var; adapter yok | Turkce zero-shot/retrieval golden set + CPU/GPU/RAM profili |

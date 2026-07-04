@@ -35,6 +35,11 @@ class Settings:
         os.getenv("XNATIVE_WORKER_TOKEN_BUCKET_REFILL_PER_SECOND", "10")
     )
     retry_max_attempts: int = int(os.getenv("XNATIVE_RETRY_MAX_ATTEMPTS", "5"))
+    target_system_ram_bytes: int = int(os.getenv("XNATIVE_TARGET_SYSTEM_RAM_BYTES", "8589934592"))
+    rss_soft_limit_bytes: int = int(os.getenv("XNATIVE_RSS_SOFT_LIMIT_BYTES", "5905580032"))
+    min_os_headroom_bytes: int = int(os.getenv("XNATIVE_MIN_OS_HEADROOM_BYTES", "2147483648"))
+    min_gpu_vram_bytes: int = int(os.getenv("XNATIVE_MIN_GPU_VRAM_BYTES", "2147483648"))
+    max_concurrent_heavy_models: int = int(os.getenv("XNATIVE_MAX_CONCURRENT_HEAVY_MODELS", "1"))
     risk_review_threshold: float = float(os.getenv("XNATIVE_RISK_REVIEW_THRESHOLD", "0.60"))
     heavy_escalation_confidence: float = float(
         os.getenv("XNATIVE_HEAVY_ESCALATION_CONFIDENCE", "0.55")
