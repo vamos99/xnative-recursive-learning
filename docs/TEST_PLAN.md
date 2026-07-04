@@ -62,7 +62,7 @@ Tarih: 2026-06-22
 | `P5-MM-004` | P5-009 | GPU OOM/model yok | CPU/cheap fallback; job kaybolmaz |
 | `P5-ALG-001` | P5-010 | NB/logistic/SGD time split | Leakage audit ve learning curve raporu |
 
-2026-07-04 kismi kod kaniti: `tests/unit/test_text_benchmark.py`, `xnative/evaluation/text_benchmark.py` icin TF-IDF+MultinomialNB, TF-IDF+logistic regression ve HashingVectorizer+SGD modellerinin ayni zaman sirali split uzerinde kosmasini, class count ve train/test sinirlarini, duplicate text leakage uyarisi ve minimum ornek validasyonunu dogrular. Bu kanit henuz gercek veri learning curve, calibration veya champion/challenger registry kapsamaz.
+2026-07-04 kismi kod kaniti: `tests/unit/test_text_benchmark.py`, `xnative/evaluation/text_benchmark.py` icin TF-IDF+MultinomialNB, TF-IDF+logistic regression ve HashingVectorizer+SGD modellerinin ayni zaman sirali split uzerinde kosmasini, class count ve train/test sinirlarini, duplicate text leakage uyarisi, learning-curve noktalari ve minimum ornek validasyonunu dogrular. Bu kanit henuz gercek veri raporu, calibration veya champion/challenger registry kapsamaz.
 | `P5-CLIP-001` | P5-012 | Türkçe zero-shot golden set | Quality + CPU/GPU/RSS raporu |
 | `P6-RET-001` | P6-002 | Lexical ve semantic query set | BM25, dense, RRF Recall@K/NDCG raporu |
 | `P6-EVT-001` | P6-004,007 | Aynı/farklı temporal event | False merge ve fragmentation ölçülür |

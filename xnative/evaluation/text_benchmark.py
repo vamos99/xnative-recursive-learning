@@ -51,12 +51,33 @@ class TextModelResult:
 
 
 @dataclass(frozen=True)
+class TextLearningCurvePoint:
+    train_fraction: float
+    train_size: int
+    test_size: int
+    best_model_name: str | None
+    best_macro_f1: float
+    results: tuple[TextModelResult, ...]
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "train_fraction": self.train_fraction,
+            "train_size": self.train_size,
+            "test_size": self.test_size,
+            "best_model_name": self.best_model_name,
+            "best_macro_f1": self.best_macro_f1,
+            "results": [result.as_dict() for result in self.results],
+        }
+
+
+@dataclass(frozen=True)
 class TextBenchmarkReport:
     feature_version: str
     train_fraction: float
     class_counts: dict[str, int]
     leakage_audit: dict[str, object]
     results: tuple[TextModelResult, ...]
+    learning_curve: tuple[TextLearningCurvePoint, ...]
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -65,6 +86,7 @@ class TextBenchmarkReport:
             "class_counts": self.class_counts,
             "leakage_audit": self.leakage_audit,
             "results": [result.as_dict() for result in self.results],
+            "learning_curve": [point.as_dict() for point in self.learning_curve],
         }
 
 
@@ -141,18 +163,14 @@ def _model_specs(random_state: int) -> tuple[tuple[str, Any], ...]:
     )
 
 
-def benchmark_text_classifiers(
-    examples: Sequence[TextBenchmarkExample],
+def _evaluate_models(
     *,
-    train_fraction: float = 0.67,
-    random_state: int = 13,
-) -> TextBenchmarkReport:
-    train_examples, test_examples = _time_ordered_split(examples, train_fraction)
-    train_texts = [example.text for example in train_examples]
-    train_labels = [example.label for example in train_examples]
-    test_texts = [example.text for example in test_examples]
-    test_labels = [example.label for example in test_examples]
-    class_counts = dict(Counter(example.label for example in examples))
+    train_texts: Sequence[str],
+    train_labels: Sequence[str],
+    test_texts: Sequence[str],
+    test_labels: Sequence[str],
+    random_state: int,
+) -> tuple[TextModelResult, ...]:
     train_class_count = len(set(train_labels))
     results: list[TextModelResult] = []
 
@@ -165,8 +183,8 @@ def benchmark_text_classifiers(
                     macro_f1=0.0,
                     train_seconds=0.0,
                     predict_seconds=0.0,
-                    train_size=len(train_examples),
-                    test_size=len(test_examples),
+                    train_size=len(train_texts),
+                    test_size=len(test_texts),
                     predictions=(),
                     skipped_reason="train_split_has_single_class",
                 )
@@ -188,16 +206,71 @@ def benchmark_text_classifiers(
                 ),
                 train_seconds=train_seconds,
                 predict_seconds=predict_seconds,
-                train_size=len(train_examples),
-                test_size=len(test_examples),
+                train_size=len(train_texts),
+                test_size=len(test_texts),
                 predictions=predictions,
             )
         )
+
+    return tuple(results)
+
+
+def _learning_curve(
+    examples: Sequence[TextBenchmarkExample],
+    fractions: Sequence[float],
+    random_state: int,
+) -> tuple[TextLearningCurvePoint, ...]:
+    points: list[TextLearningCurvePoint] = []
+    for fraction in sorted(set(fractions)):
+        train_examples, test_examples = _time_ordered_split(examples, fraction)
+        results = _evaluate_models(
+            train_texts=[example.text for example in train_examples],
+            train_labels=[example.label for example in train_examples],
+            test_texts=[example.text for example in test_examples],
+            test_labels=[example.label for example in test_examples],
+            random_state=random_state,
+        )
+        completed = [result for result in results if result.skipped_reason is None]
+        best = max(completed, key=lambda result: result.macro_f1, default=None)
+        points.append(
+            TextLearningCurvePoint(
+                train_fraction=fraction,
+                train_size=len(train_examples),
+                test_size=len(test_examples),
+                best_model_name=best.model_name if best else None,
+                best_macro_f1=best.macro_f1 if best else 0.0,
+                results=results,
+            )
+        )
+    return tuple(points)
+
+
+def benchmark_text_classifiers(
+    examples: Sequence[TextBenchmarkExample],
+    *,
+    train_fraction: float = 0.67,
+    learning_curve_fractions: Sequence[float] = (0.5, 0.67, 0.8),
+    random_state: int = 13,
+) -> TextBenchmarkReport:
+    train_examples, test_examples = _time_ordered_split(examples, train_fraction)
+    train_texts = [example.text for example in train_examples]
+    train_labels = [example.label for example in train_examples]
+    test_texts = [example.text for example in test_examples]
+    test_labels = [example.label for example in test_examples]
+    class_counts = dict(Counter(example.label for example in examples))
+    results = _evaluate_models(
+        train_texts=train_texts,
+        train_labels=train_labels,
+        test_texts=test_texts,
+        test_labels=test_labels,
+        random_state=random_state,
+    )
 
     return TextBenchmarkReport(
         feature_version="text-benchmark-v1",
         train_fraction=train_fraction,
         class_counts=class_counts,
         leakage_audit=_leakage_audit(train_examples, test_examples),
-        results=tuple(results),
+        results=results,
+        learning_curve=_learning_curve(examples, learning_curve_fractions, random_state),
     )
