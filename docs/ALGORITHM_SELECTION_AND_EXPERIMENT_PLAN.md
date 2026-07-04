@@ -51,6 +51,8 @@ LSTM, transformer, genetik algoritma veya Adam gibi isimler sirf yaygin olduklar
 | Hyperparameter arama | Random search/successive halving | Optuna TPE, ihtiyac olursa | Genetic/PSO/grid patlamasi | Ayni compute butcesinde anlamli uplift |
 | Worker planlama | Deterministic priority + resource semaphore | Kucuk knapsack/EDF heuristic | Meta-sezgisel scheduler | Kuyruk/SLO simulasyonunda kanitli kazanc |
 
+Kod-backed P5-010 baslangici: `xnative/evaluation/text_benchmark.py`, TF-IDF+MultinomialNB, TF-IDF+logistic regression ve HashingVectorizer+SGD modellerini ayni zaman sirali split uzerinde kosar. Rapor; class count, train/test zaman siniri, duplicate text hash overlap uyarisi, accuracy, macro-F1 ve train/predict surelerini dondurur. Bu omurga learning curve ve calibration raporunun altyapisidir; tek basina champion model karari degildir.
+
 ## 3.1 Genis teknoloji radari
 
 Durumlar:

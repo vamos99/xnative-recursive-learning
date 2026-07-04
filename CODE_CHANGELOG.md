@@ -30,6 +30,7 @@ Code changes were allowed in this revision.
 - Added media lifecycle audit events for local object upserts, reference changes and remote snapshot records.
 - Added bounded video/audio lifecycle planning for frame offsets, duration gates and limited audio extraction decisions.
 - Added local multimodal evidence baseline for text, quote, alt/OCR, audio-video presence, relationship signals and missingness.
+- Added offline text benchmark harness for TF-IDF, HashingVectorizer, MultinomialNB, logistic regression and SGD with time-split leakage audit.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.
