@@ -12,6 +12,13 @@ Bir postun degeri yalnız metindeki acik futbol kelimelerinden gelmez. Kanit asa
 
 Bu nedenle tek bir “football/not football” classifier yeterli degildir.
 
+## Weak-supervision golden seti
+
+İlk kod-backed sentetik dilim `tests/fixtures/multimodal_weak_supervision.json`
+dosyasıdır. Bu fixture, metin içinde doğrudan futbol terimi yokken alt text,
+OCR veya quote bağlamının topic evidence üretip üretmediğini test eder. Gerçek
+veri, kullanıcı credential'ı veya özel hesap içeriği içermez.
+
 ## Temsil modeli
 
 Her post icin ayri feature gruplari saklanir:

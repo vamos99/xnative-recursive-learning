@@ -30,6 +30,7 @@ Code changes were allowed in this revision.
 - Added media lifecycle audit events for local object upserts, reference changes and remote snapshot records.
 - Added bounded video/audio lifecycle planning for frame offsets, duration gates and limited audio extraction decisions.
 - Added local multimodal evidence baseline for text, quote, alt/OCR, audio-video presence, relationship signals and missingness.
+- Added sentetik weak-supervision golden fixture for non-literal football context where text has no direct football terms but quote, alt text or OCR supplies context.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.
