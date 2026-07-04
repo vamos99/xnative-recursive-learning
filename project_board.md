@@ -21,7 +21,7 @@ claims.
 - Phase 3 remaining: full domain pipeline stage chain beyond normalize.
 - Phase 4 remaining: none after the video/audio lifecycle PR is merged; real decode/OCR/ASR moves to Phase 5.
 - Phase 5 partial: local multimodal evidence baseline for text, quote, visual alt/OCR, audio-video presence, relationship signal and missingness.
-- Phase 5 partial: hardware preflight and heavy-model admission policy for 8 GB RAM/GTX 1050 class target, including CPU fallback and RSS soft limit.
+- Phase 5 partial: hardware preflight, `xnative-preflight` report CLI and heavy-model admission policy for 8 GB RAM/GTX 1050 class target, including CPU fallback and RSS soft limit.
 - P14 documentation remains continuously synchronized with implementation.
 
 ## Next - Phase 4 plus Phase 2 gaps

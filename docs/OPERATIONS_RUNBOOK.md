@@ -53,6 +53,15 @@ CLI P1/P3/P12'de uygulanana kadar mevcut baseline yalnız `python -m xnative.sam
 
 ## 5. GPU OOM veya yüksek RAM
 
+Hızlı preflight:
+
+```bash
+.venv/bin/xnative-preflight --format json --output data/logs/hardware_preflight.json
+.venv/bin/xnative-preflight --format text --request-name openclip-small --estimated-ram-mib 768 --estimated-vram-mib 2048
+```
+
+Bu komut ağır model yüklemez; RAM/RSS/GPU sinyallerini ve örnek heavy-model admission kararını raporlar. Çıkış kodu `0` ise istek kabul edilmiştir, `2` ise heavy iş durdurulmalı veya daha ucuz fallback seçilmelidir. `data/logs/*` runtime çıktısıdır ve GitHub'a yüklenmez.
+
 1. Yeni heavy admission'ı durdur.
 2. Model cache'i unload et; CUDA cache yalnız adapter güvenli noktada temizlenir.
 3. İşi CPU/cheap fallback ile retry et.
@@ -115,4 +124,3 @@ Restore ayrı temp dizinde doğrulanmadan aktif DB üzerine yazılmaz. `foreign_
 ## 11. Incident kaydı
 
 Zorunlu alanlar: incident ID, başlangıç/bitiş, kullanıcı etkisi, correlation/job/model/config ID, detection, containment, root cause, veri kaybı, düzeltme, test, follow-up backlog ve owner.
-

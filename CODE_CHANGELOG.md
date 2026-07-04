@@ -31,6 +31,7 @@ Code changes were allowed in this revision.
 - Added bounded video/audio lifecycle planning for frame offsets, duration gates and limited audio extraction decisions.
 - Added local multimodal evidence baseline for text, quote, alt/OCR, audio-video presence, relationship signals and missingness.
 - Added hardware preflight and heavy-model admission policy for RSS soft limit, CPU fallback, GPU/VRAM gate and single-heavy-model scheduling.
+- Added `xnative-preflight` CLI for target-machine hardware reports and optional heavy-model admission dry-runs without loading large models.
 - Added risk, event, source candidate, novelty/fatigue and final decision scoring.
 - Added template-based X-native draft generator that works without LLM.
 - Added feedback store, online weight updates and weekly report.

@@ -4,6 +4,7 @@ from xnative.runtime.hardware import (
     assess_hardware_preflight,
     decide_heavy_model_admission,
 )
+from xnative.runtime.preflight_cli import main as preflight_cli_main
 
 GIB = 1024**3
 
@@ -120,3 +121,63 @@ def test_heavy_model_admission_rejects_estimated_ram_over_soft_limit() -> None:
     assert not decision.accepted
     assert decision.reason == "estimated_ram_exceeds_soft_limit"
     assert decision.should_unload_models
+
+
+def test_preflight_cli_writes_json_report_with_admission(tmp_path) -> None:
+    output = tmp_path / "preflight.json"
+
+    exit_code = preflight_cli_main(
+        [
+            "--format",
+            "json",
+            "--output",
+            str(output),
+            "--system-ram-mib",
+            "8192",
+            "--current-rss-mib",
+            "2048",
+            "--gpu-name",
+            "GTX 1050",
+            "--gpu-vram-mib",
+            "4096",
+            "--cuda-available",
+            "--request-name",
+            "openclip-small",
+            "--estimated-ram-mib",
+            "768",
+            "--estimated-vram-mib",
+            "2048",
+        ]
+    )
+
+    assert exit_code == 0
+    content = output.read_text(encoding="utf-8")
+    assert '"heavy_jobs_allowed": true' in content
+    assert '"execution_device": "gpu"' in content
+    assert '"request-name"' not in content
+
+
+def test_preflight_cli_returns_nonzero_when_admission_is_blocked(capsys) -> None:
+    exit_code = preflight_cli_main(
+        [
+            "--format",
+            "text",
+            "--system-ram-mib",
+            "8192",
+            "--current-rss-mib",
+            "2048",
+            "--gpu-name",
+            "GTX 1050",
+            "--gpu-vram-mib",
+            "1024",
+            "--request-name",
+            "gpu-only-vlm",
+            "--requires-gpu",
+            "--no-cpu-fallback",
+        ]
+    )
+
+    assert exit_code == 2
+    captured = capsys.readouterr()
+    assert "admission_accepted=False" in captured.out
+    assert "admission_reason=gpu_required_but_unavailable" in captured.out
