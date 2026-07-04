@@ -115,7 +115,7 @@ Bagimlilik: Faz 3 ve 4.
 4. `P5-004` `EKLE` image caption/VLM adapteri; sadece belirsiz orneklerde ve butce uygunsa calistir.
 5. `P5-005` `EKLE` video frame embedding, OCR ve opsiyonel yerel Whisper ASR.
 6. `P5-006` `EKLE` text-image uyum, tamamlayicilik ve bilincli uyumsuzluk sinyalleri. Durum: `DEVAM`.
-7. `P5-007` `EKLE` “futbol kelimesi yok ama futbol baglami var” weak-supervision test seti.
+7. `P5-007` `EKLE` “futbol kelimesi yok ama futbol baglami var” weak-supervision test seti. Durum: `DEVAM`.
 8. `P5-008` `EKLE` modality missingness ve confidence calibration; eksik medya “alakasiz” sayilmasin. Durum: `DEVAM`.
 9. `P5-009` `EKLE` 8 GB RAM/GTX 1050 hardware preflight, CPU fallback, tek-agir-model scheduler ve OOM recovery.
 10. `P5-010` `EKLE` text algoritma benchmarki: TF-IDF/HashingVectorizer, MultinomialNB, logistic regression ve online SGD; zaman split'i ve learning curve.
@@ -124,7 +124,7 @@ Bagimlilik: Faz 3 ve 4.
 
 Kabul kapisi: Metin, gorsel, quote ve OCR tek basina veya birlikte konu kaniti uretebilir; her modality katkisi aciklanabilir; model yoklugunda pipeline calismaya devam eder.
 
-Faz 5 kismi kanit: `xnative/media/multimodal_evidence.py`, text/quote/visual/audio-video modality kanitlarini, topic adaylarini, OCR/alt-text fallback durumunu, missing modality bilgisini ve text-media iliski sinyalini zorunlu dis servis olmadan uretir. `tests/unit/test_multimodal_evidence.py`, futbol kelimesi metinde yokken gorsel/alt/OCR kanitinin konu saglamasini, eksik medyanin negatif sayilmamasini, video OCR/audio-video sinyalini ve hem legacy capture dataclass hem domain `CapturedPost` adapter davranisini dogrular. Bu kanit henuz embedding, CLIP, ASR, confidence calibration modeli veya hardware preflight'i kapsamaz.
+Faz 5 kismi kanit: `xnative/media/multimodal_evidence.py`, text/quote/visual/audio-video modality kanitlarini, topic adaylarini, OCR/alt-text fallback durumunu, missing modality bilgisini ve text-media iliski sinyalini zorunlu dis servis olmadan uretir. `tests/fixtures/multimodal_weak_supervision.json`, metinde dogrudan futbol terimi yokken quote, alt text veya OCR'dan futbol baglami gelen sentetik golden ornekleri tutar. `tests/unit/test_multimodal_evidence.py`, futbol kelimesi metinde yokken gorsel/alt/OCR kanitinin konu saglamasini, eksik medyanin negatif sayilmamasini, video OCR/audio-video sinyalinin aciklanabilir olmasini, weak-supervision fixture'inda topic source davranisini ve hem legacy capture dataclass hem domain `CapturedPost` adapter davranisini dogrular. Bu kanit henuz embedding, CLIP, ASR, confidence calibration modeli veya hardware preflight'i kapsamaz.
 
 ### Faz 6 - Olay belleği, baglam ve semantik arsiv
 

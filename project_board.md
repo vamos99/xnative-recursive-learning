@@ -20,7 +20,7 @@ claims.
 - Phase 2 remaining: live X selector drift smoke.
 - Phase 3 remaining: full domain pipeline stage chain beyond normalize.
 - Phase 4 remaining: none after the video/audio lifecycle PR is merged; real decode/OCR/ASR moves to Phase 5.
-- Phase 5 partial: local multimodal evidence baseline for text, quote, visual alt/OCR, audio-video presence, relationship signal and missingness.
+- Phase 5 partial: local multimodal evidence baseline for text, quote, visual alt/OCR, audio-video presence, relationship signal, missingness and sentetik weak-supervision golden fixture.
 - P14 documentation remains continuously synchronized with implementation.
 
 ## Next - Phase 4 plus Phase 2 gaps

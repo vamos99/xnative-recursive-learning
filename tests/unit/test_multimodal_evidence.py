@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from xnative.capture.x_post_schema import CapturedMedia, CapturedPost
 from xnative.domain import CapturedPost as DomainCapturedPost
 from xnative.domain import CaptureSource, MediaAsset, MediaKind
@@ -5,6 +8,8 @@ from xnative.media.multimodal_evidence import (
     build_multimodal_evidence,
     build_multimodal_evidence_from_post,
 )
+
+FIXTURES_DIR = Path(__file__).resolve().parents[1] / "fixtures"
 
 
 def test_visual_evidence_supplies_context_when_text_is_ambiguous() -> None:
@@ -83,3 +88,24 @@ def test_build_multimodal_evidence_from_domain_post() -> None:
     assert evidence.language == "tr"
     assert "maç" in evidence.topic_candidates
     assert evidence.relationship_evidence.signals["relationship"] == "supports"
+
+
+def test_weak_supervision_golden_set_covers_non_literal_football_context() -> None:
+    cases = json.loads((FIXTURES_DIR / "multimodal_weak_supervision.json").read_text())
+
+    assert cases
+    for case in cases:
+        evidence = build_multimodal_evidence(
+            text=case["text"],
+            quoted_text=case.get("quoted_text", ""),
+            media_items=case.get("media_items", []),
+            ocr_text_by_media_id=case.get("ocr_text_by_media_id", {}),
+        )
+
+        assert evidence.text_evidence.signals["matched_terms"] == [], case["id"]
+        for topic in case["expected_topics"]:
+            assert topic in evidence.topic_candidates, case["id"]
+        assert (
+            evidence.relationship_evidence.signals["relationship"] == case["expected_relationship"]
+        ), case["id"]
+        assert evidence.relationship_evidence.present, case["id"]

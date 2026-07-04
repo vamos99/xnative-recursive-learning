@@ -1,0 +1,59 @@
+[
+  {
+    "id": "visual_stadium_context",
+    "text": "Bu kare her seyi anlatiyor",
+    "quoted_text": "",
+    "media_items": [
+      {
+        "id": "image-1",
+        "media_type": "image",
+        "alt_text": "Tribunlerde gol sevinci ve skor tabelasi"
+      }
+    ],
+    "expected_topics": ["gol", "skor", "tribun"],
+    "expected_relationship": "visual_supplies_context",
+    "topic_source": "visual"
+  },
+  {
+    "id": "ocr_penalty_context",
+    "text": "Kimse hazir degildi",
+    "quoted_text": "",
+    "media_items": [
+      {
+        "id": "video-1",
+        "media_type": "video",
+        "alt_text": ""
+      }
+    ],
+    "ocr_text_by_media_id": {
+      "video-1": "Saha icinde penalti tekrari bekleniyor"
+    },
+    "expected_topics": ["penalti", "saha"],
+    "expected_relationship": "visual_supplies_context",
+    "topic_source": "visual_ocr"
+  },
+  {
+    "id": "quote_supplies_match_context",
+    "text": "Bu karar cok konusulur",
+    "quoted_text": "Hakem macin son aninda oyunu durdurdu",
+    "media_items": [],
+    "expected_topics": ["hakem", "mac"],
+    "expected_relationship": "text_only_context",
+    "topic_source": "quote"
+  },
+  {
+    "id": "visual_kit_pitch_context",
+    "text": "Detay aslinda orada",
+    "quoted_text": "",
+    "media_items": [
+      {
+        "id": "image-2",
+        "media_type": "image",
+        "alt_text": "Yesil saha uzerinde yeni forma tanitimi"
+      }
+    ],
+    "expected_topics": ["forma", "saha"],
+    "expected_relationship": "visual_supplies_context",
+    "topic_source": "visual"
+  }
+]
