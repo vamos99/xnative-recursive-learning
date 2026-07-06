@@ -2,7 +2,7 @@
 
 Durum: Final implementer girişi  
 Sürüm: 1.0  
-Tarih: 2026-06-22
+Tarih: 2026-07-06
 
 ## 1. Başlangıç noktası
 
@@ -87,7 +87,7 @@ model regression -> champion rollback
 
 ## 8. Doğrulama
 
-Core komutları `TEST_PLAN.md` içindedir. Faz tamamlanması için ayrıca ilgili integration, performance, security ve document evidence gerekir. Mevcut 15 test sadece baseline helper davranışını kanıtlar.
+Core komutları `TEST_PLAN.md` içindedir. Faz tamamlanması için ayrıca ilgili integration, performance, security ve document evidence gerekir. Mevcut testler P1-P4 kısmi kod kanıtlarını ve ilk P5 multimodal/text benchmark omurgasını kapsar; release-ready iddiası için UI, Docker runtime, security/privacy, performance ve end-to-end learning kanıtları hâlâ eksiktir.
 
 ## 9. Diyagramlar
 

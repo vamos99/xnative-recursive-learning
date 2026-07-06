@@ -1,10 +1,12 @@
 # XNative Recursive Learning - Local-first Multimodal X Content System
 
-> **Current status (2026-06-25): Phase 1 data backbone, Phase 2 API capture
-> route/outbox work, and Phase 3 durable worker core are implemented.** The
-> fixture-based scoring helpers, storage/API/job tests and worker runtime unit
-> path run, but recorded DOM fixture capture, review UI, multimodal learning and
-> Docker acceptance are not yet end-to-end complete.
+> **Current status (2026-07-06): Phase 1 data backbone, Phase 2 local capture
+> API/outbox, Phase 3 durable worker core, Phase 4 media lifecycle and the first
+> Phase 5 local multimodal/text-benchmark baselines are implemented.** The
+> fixture-based scoring helpers, storage/API/job/media tests, recorded DOM
+> fixture checks, local multimodal evidence tests and text benchmark harness run.
+> Live X selector drift, full domain pipeline stages, review UI, real OCR/CLIP/ASR
+> adapters, Docker runtime acceptance and end-to-end learning are not complete.
 > Do not treat the archived `TEST_OUTPUT.txt` or earlier Final QA document as a
 > production-readiness statement.
 
@@ -44,6 +46,14 @@ The project is not a news bot. It does not use X API, does not require Gemini/Op
 - Manual fixture import and sample mode added.
 - Text, quote, media alt text, OCR fallback, exact SHA-256 media hashing, dHash64 perceptual hashing, risk scoring, event scoring, source candidate scoring, draft generation, feedback learning, and weekly report modules added.
 - Local media storage now uses content-addressed paths with a runtime manifest and SQLite lifecycle records for duplicate blob prevention, logical references, retention snapshots and unreferenced-file garbage collection.
+- Phase 4 media lifecycle now includes quota/LRU cleanup, protected-original
+  behavior, lifecycle audit events, bounded video/GIF frame planning and audio
+  duration/extraction gates.
+- Phase 5 currently includes local multimodal evidence for text, quote, visual
+  alt/OCR, audio-video presence, missingness and relationship signals.
+- The current benchmark branch also adds an offline text benchmark harness for
+  TF-IDF/HashingVectorizer, MultinomialNB, logistic regression and SGD with
+  time-split leakage audit and learning-curve points.
 - Pytest coverage added for the local MVP.
 - Docker and Docker Compose added.
 
@@ -88,10 +98,12 @@ contracts, Phase 2 API capture persistence, parser hygiene, payload limits,
 validation, manual archive import, recorded DOM payload fixture flow and the
 browser content-script fixture flow and the Phase 3 job queue/worker runtime core,
 including dead-letter visibility/retry,
-stage error taxonomy, token bucket admission and micro-batch execution.
-They do not yet prove the recorded DOM
-fixture -> API -> database -> review -> feedback workflow. See the traceability
-matrix for the missing acceptance coverage.
+stage error taxonomy, token bucket admission and micro-batch execution. They also
+cover Phase 4 media lifecycle/hash behavior and the first Phase 5 local
+multimodal/text-benchmark baselines.
+They do not yet prove the full recorded DOM fixture -> API -> database -> domain
+pipeline -> review -> feedback workflow. See the traceability matrix for the
+missing acceptance coverage.
 
 Optional browser QA:
 
@@ -136,6 +148,7 @@ It does not collect cookies, passwords, 2FA, hidden data, or credentials. It doe
 - `xnative/ingestion` - normalization, deduplication, event building.
 - `xnative/media` - media metadata, optional OCR fallback, exact/perceptual hashing, content-addressed local storage, risk.
 - `xnative/nlp` - text cleaning, language fallback, style memory, quality filters.
+- `xnative/evaluation` - local offline model benchmark/evaluation helpers.
 - `xnative/scoring` - event, candidate, risk, novelty/fatigue, final decision scores.
 - `xnative/generation` - template fallback suggestions and optional LLM adapter.
 - `xnative/learning` - feedback storage, online weight updates, weekly reports.

@@ -1,7 +1,7 @@
 # Muhendislik Baseline Kaniti
 
-Tarih: 2026-06-25  
-Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
+Tarih: 2026-07-06  
+Faz: P0-P4 kismi uygulama kanitlari ve ilk P5 multimodal/text benchmark omurgasi eklendi
 
 ## Ortam
 
@@ -15,16 +15,16 @@ Faz: P0 tamam; P1/P2 kanitlari ve P3 worker runtime cekirdegi eklendi
 
 ```text
 .venv/bin/pytest -q
-54 passed in 0.55s
+67 passed, 1 warning
 
 .venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py
 All checks passed
 
 .venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py
-81 files already formatted
+87 files already formatted
 
 .venv/bin/mypy xnative
-Success: no issues found in 74 source files
+Success: no issues found in 77 source files
 
 .venv/bin/python -m compileall -q xnative tests scripts/docs
 exit 0
@@ -99,8 +99,15 @@ background -> API -> DB fixture ok
 - Acceptance testleri: `tests/unit/test_media_hashing.py`, `tests/unit/test_video_audio_lifecycle.py`, `tests/integration/test_phase1_storage.py`.
 - Kanitlanan kapilar: ayni byte exact SHA esitligi, kucuk gorsel degisiklikte perceptual near-duplicate, farkli gorselde Hamming threshold disi, kucuk batch cluster, content-addressed tek dosya, iki logical reference, duplicate reference idempotency, reference release, media lifecycle audit eventleri, unreferenced media GC, retention TTL sonrasi metadata-only gecis, silinmis remote URL snapshot davranisi, SQLite-backed lifecycle refcount/idempotency, quota/LRU deletion order, protected original policy, min-free target davranisi, video/gif icin sinirli frame offset plani, video/audio duration gate ve sinirli audio extraction karari.
 
+## Faz 5 kismi kod kaniti
+
+- Local multimodal evidence: `xnative/media/multimodal_evidence.py`.
+- Offline text benchmark: `xnative/evaluation/text_benchmark.py`.
+- Acceptance testleri: `tests/unit/test_multimodal_evidence.py`, `tests/unit/test_text_benchmark.py`.
+- Kanitlanan kapilar: text/quote/alt/OCR/audio-video evidence, missing modality negatif sayilmamasi, relationship signal, domain/legacy capture adapterleri, TF-IDF+NB, TF-IDF+logistic regression ve HashingVectorizer+SGD benchmark omurgasi, zaman sirali split, duplicate leakage audit ve learning-curve noktalari.
+
 ## Sinirlar
 
 - Bu baseline mevcut testlerin, content-script browser fixture check'in ve background -> API -> DB fixture check'in gectigini kanitlar; canli X selector drift, review ve feedback akisini kanitlamaz.
 - Docker Compose konfigurasyonu parse edildi; yerel Docker daemon calismadigi icin runtime health acceptance yapilmadi.
-- Multimodal model kalitesi ve performans SLO'lari henuz benchmark edilmedi.
+- Gercek OCR/CLIP/ASR adapterleri, confidence calibration, review UI, real-data benchmark raporu ve performans SLO'lari henuz tamamlanmadi.

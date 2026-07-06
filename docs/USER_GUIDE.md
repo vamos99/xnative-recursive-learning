@@ -1,7 +1,7 @@
 # XNative Kullanıcı ve Baseline Çalıştırma Rehberi
 
 Durum: Mevcut baseline için doğru; hedef ürün akışı ayrıca belirtilmiştir.  
-Tarih: 2026-06-22
+Tarih: 2026-07-06
 
 ## 1. Mevcut doğrulanmış baseline
 
@@ -12,11 +12,11 @@ pytest -q
 python -m xnative.sample_pipeline
 ```
 
-Bu komut fixture/helper baseline'ını çalıştırır. Extension -> API -> DB -> durable worker -> UI akışını henüz kanıtlamaz.
+Bu komut fixture/helper baseline'ını ve mevcut otomatik testleri çalıştırır. Extension -> API -> DB fixture akışı ve worker core testlidir; tam domain pipeline -> review -> feedback akışını henüz kanıtlamaz.
 
 ## 2. Extension durumu
 
-Extension klasörü yüklenebilir, ancak mevcut FastAPI `/capture` route'unu kaydetmediği için capture E2E tamamlanmış değildir. Faz 2 tamamlanana kadar extension üretim capture aracı sayılmaz.
+Extension klasörü yüklenebilir. `/api/v1/captures` ve geçici `/capture` alias'ı local API tarafında testlidir; content-script fixture ve background -> API -> DB fixture QA vardır. Canlı X selector drift smoke ve üretim capture kabulü hâlâ tamamlanmamıştır.
 
 Güvenlik sınırı değişmez: extension yalnız görünür DOM'u okur; cookie, password, 2FA veya hidden/private veri toplamaz ve public action yapmaz.
 
@@ -39,4 +39,3 @@ Güvenlik sınırı değişmez: extension yalnız görünür DOM'u okur; cookie,
 - Riskli öneriyi policy/human review dışında yayınlama.
 
 Operasyon ve incident adımları `OPERATIONS_RUNBOOK.md` içindedir.
-
