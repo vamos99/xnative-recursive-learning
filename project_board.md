@@ -10,7 +10,7 @@ claims.
 - Phase 1: domain contracts, SQLite migration, repository/UoW and storage tests.
 - Phase 2 partial: API capture route, readiness routes, bounded payload handling, parser hygiene, recorded DOM payload fixture, browser content-script fixture, background -> API -> DB QA, manual archive fixture persistence and extension outbox retry.
 - Phase 3 partial: durable job state machine, retry/dead-letter, resource admission, priority aging, backpressure, cursor/cache, token bucket, micro-batch, worker loop, API job view and Streamlit dead-letter panel.
-- Phase 4 partial: exact SHA-256 media hash separated from `dhash64-v1` perceptual hash, Hamming threshold helper, small-batch cluster test, content-addressed local store, manifest refcount, SQLite lifecycle records, lifecycle audit events, retention snapshots, protected-original quota/LRU policy, unreferenced-file GC and bounded video/audio lifecycle gates.
+- Phase 4 done: exact SHA-256 media hash separated from `dhash64-v1` perceptual hash, Hamming threshold helper, small-batch cluster test, content-addressed local store, manifest refcount, SQLite lifecycle records, lifecycle audit events, retention snapshots, protected-original quota/LRU policy, unreferenced-file GC and bounded video/audio lifecycle gates.
 - Baseline architecture, multimodal, performance, archive and provider policies.
 - Editable Mermaid, draw.io and Excalidraw planning diagrams.
 - Current master DOCX/PDF planning documents and visual QA.
@@ -19,15 +19,21 @@ claims.
 
 - Phase 2 remaining: live X selector drift smoke.
 - Phase 3 remaining: full domain pipeline stage chain beyond normalize.
-- Phase 4 remaining: none after the video/audio lifecycle PR is merged; real decode/OCR/ASR moves to Phase 5.
 - Phase 5 partial: local multimodal evidence baseline for text, quote, visual alt/OCR, audio-video presence, relationship signal, missingness and offline text benchmark harness with learning-curve points.
 - P14 documentation remains continuously synchronized with implementation.
 
-## Next - Phase 4 plus Phase 2 gaps
+## Todo roadmap
 
-- P2-005..007: recorded DOM fixture quality, quote/main media boundary and manual archive flow.
-- P4-003..007: metadata-first archive, optional thumbnail/original policy, media lifecycle and video/audio limits are code-backed; next implementation focus can move to P5 media understanding adapters after merge.
-- P11 later: review/dead-letter UI visibility.
+- Phase 5 remaining: real OCR adapter integration, visual embedding/caption fallback, video frame OCR/embedding, optional local ASR, real-data learning-curve report, confidence-aware late fusion and OpenCLIP/MobileCLIP benchmark.
+- Phase 6: retrieval, event memory, FTS5/vector-ready contract, temporal clustering, novelty/fatigue and typed graph baselines.
+- Phase 7: source discovery, reliability learning, uncertainty and approve/watch/reject workflow.
+- Phase 8: candidate generation, multi-objective ranking, MMR/diversity, calibration and threshold gates.
+- Phase 9: event/style-aware draft generation, safety gates and optional quota-aware provider fallback.
+- Phase 10: feedback, reward, bandit experiments, drift/degradation, model registry and rollback.
+- Phase 11: real review UI and operational dashboard.
+- Phase 12: observability, security, backup/restore and performance gates.
+- Phase 13: release test matrix and acceptance gates.
+- Phase 14: final code-aligned docs, diagrams, cards and QA release package.
 
 ## Blocked release claims
 

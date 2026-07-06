@@ -39,10 +39,11 @@ Code changes were allowed in this revision.
 
 ## Validation
 
-`.venv/bin/pytest -q` -> 46 passed.
+`.venv/bin/pytest -q` -> 67 passed, 1 warning.
 `.venv/bin/ruff check xnative tests scripts/docs/build_master_plan.py` -> passed.
 `.venv/bin/ruff format --check xnative tests scripts/docs/build_master_plan.py` -> passed.
 `.venv/bin/mypy xnative` -> passed.
+`.venv/bin/python -m compileall -q xnative tests scripts/docs` -> passed.
 `node --check extension/background.js` -> passed.
 `node --check extension/content.js` -> passed.
-`python -m json.tool extension/manifest.json` -> passed.
+`.venv/bin/python -m json.tool extension/manifest.json` -> passed.
